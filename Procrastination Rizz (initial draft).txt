@@ -1,0 +1,11 @@
+Procrastination Rizz (initial draft):
+
+make a dice starting from 1/2 1/2 probability for both the thing but with each roll it starts getting biased toward unfavourable taks (work).
+
+- streaks (unlock a reward on break record for a streak)
+- earn currency through successfully doing a task (with currency you can buy off work tasks)
+- badges (show badges like max streak etc)
+- implement a feature to save reward for later roll (if you want to work instead on that roll)
+- roll cooldown (you can't roll for a certain period of time after doing it once)(to avoid exploitation & to follow the task assigned on that roll)
+- randomization of no. of coins earned on each task completion.
+- No. of coins earned should also depend of complexity and time spent on a task
