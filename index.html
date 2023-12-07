@@ -23,6 +23,7 @@
       
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        var database = firebase.database();
         const analytics = getAnalytics(app);
       </script>
 
@@ -75,14 +76,16 @@
             <div class="w-full flex justify-center mt-8">
                 <div class="m-5">
                     <div class='m-8'>
-                        <input class='rounded-full pl-3 py-1 border-black' style='min-width:240px;' placeholder="Work task here">
+                        <input id='task' class='rounded-full pl-3 py-1 border-black' style='min-width:240px;' placeholder="Work task here">
                     </div>
                     <div class='m-8'>
                         <input class='rounded-full pl-3 py-1' style='min-width:240px;' placeholder="Recreational task here">
                     </div>
                     <div class='m-8 flex justify-center'>
-                        <button class='text-black bg-white rounded-full px-4 py-1'>Let's Roll</button>
+                        <button id='save' class='text-black bg-white rounded-full px-4 py-1'>Let's Roll</button>
+                        <button id='retrieve'>Retrieve</button>
                     </div>
+                    <ul id='dataList'></ul>
                 </div>
             </div>
         </div>
@@ -90,7 +93,32 @@
 
 
     <script>
-        // Add your inline JavaScript here
+        var database = firebase.database();
+        let  btn = document.getElementById('save');
+        btn.addEventListener('click', save);
+
+        function save(){
+            let data = document.getElementById('task').value;
+            // Get a reference to a new data node
+            let newDataRef = database.ref('data').push();
+            // Set the data in the new node
+            newDataRef.set({
+                value: data
+            });
+            alert('Data saved!');
+        }
+
+        database.ref('data').on('child_added', function(snapshot) {
+            var data = snapshot.val().value;
+            var listItem = document.createElement('li');
+            listItem.textContent = data;
+            document.getElementById('dataList').appendChild(listItem);
+        });
+        
+        function retrieve(){
+
+        }
+
     </script>
     
     <!-- Add your external JavaScript files here -->
