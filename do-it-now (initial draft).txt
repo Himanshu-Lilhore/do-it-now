@@ -1,4 +1,4 @@
-Procrastination Rizz (initial draft):
+do-it-now (initial draft):
 
 make a dice starting from 1/2 1/2 probability for both the thing but with each roll it starts getting biased toward unfavourable taks (work).
 
