@@ -5,7 +5,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const connectDB = require('./config/db')
 const PORT = process.env.PORT
-const scheduleRouter = require('./routes/scheduleRouter')
+const homeRouter = require('./routes/homeRouter')
+const taskRouter = require('./routes/taskRouter')
+const chunkRouter = require('./routes/chunkRouter')
+const dayRouter = require('./routes/dayRouter')
 
 const app = express();
 connectDB()
@@ -25,7 +28,10 @@ app.use(cors({
 }));
 
 
-app.use('/', scheduleRouter)
+app.use('/', homeRouter)
+app.use('/task', taskRouter)
+app.use('/chunk', chunkRouter)
+app.use('/day', dayRouter)
 
 
 app.listen(PORT, () => {

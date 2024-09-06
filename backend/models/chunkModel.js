@@ -15,10 +15,10 @@ const ChunkSchema = new mongoose.Schema({
         max: 10, // most productive
         default: null
     },
-    activity: {
-        type: String,
-        default: 'undefined'
-    }
+    tasks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task'
+    }]
 }, {timestamps: true});
 
 module.exports = mongoose.model('Chunk', ChunkSchema);

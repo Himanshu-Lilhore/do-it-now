@@ -4,11 +4,12 @@ const CurrStateSchema = new mongoose.Schema({
     state: {
         type: String,
         enum: ['sleep', 'awake'],
-        required: true
+        default: 'awake'
     },
     today: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Day'
+        ref: 'Day',
+        default: null
     }
 }, {timestamps: true});
 

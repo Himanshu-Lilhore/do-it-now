@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ActivitySchema = new mongoose.Schema({
+const TagSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -11,6 +11,6 @@ const ActivitySchema = new mongoose.Schema({
         enum: ['productive', 'semi-productive', 'unproductive'],
         required: true
     }
-});
+}, {timestamps: true});
 
-module.exports = mongoose.model('Activity', ActivitySchema);
+module.exports = mongoose.model('Tag', TagSchema);

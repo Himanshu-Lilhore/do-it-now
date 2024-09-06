@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const Activity = require('../models/Activity');
+const Tag = require('../models/tagModel');
 const connectDB = require('../config/db')
 
-const seedActivities = async () => {
-    const activities = [
+const seedTags = async () => {
+    const tags = [
         { name: 'learning', category: 'productive' },
         { name: 'project', category: 'productive' },
         { name: 'work', category: 'productive' },
@@ -19,21 +19,21 @@ const seedActivities = async () => {
     try {
         const ll = await connectDB()
 
-        await Activity.deleteMany({});
-        console.log('Cleared existing activities.');
+        await Tag.deleteMany({});
+        console.log('Cleared existing tags.');
 
-        for (const activity of activities) {
-            const newActivity = new Activity(activity);
-            await newActivity.save();
-            console.log(`Inserted: ${activity.name}`);
+        for (const tag of tags) {
+            const newTag = new Tag(tag);
+            await newTag.save();
+            console.log(`Inserted: ${tag.name}`);
         }
 
-        console.log('All activities have been seeded.');
+        console.log('All tags have been seeded.');
     } catch (error) {
-        console.error('Error seeding activities:', error);
+        console.error('Error seeding tags:', error);
     } finally {
         mongoose.connection.close();
     }
 };
 
-seedActivities();
+seedTags();
