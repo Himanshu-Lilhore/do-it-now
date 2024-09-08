@@ -3,8 +3,10 @@ import Axios from 'axios';
 import RefreshIcon from '@/assets/RefreshIcon';
 import AddIcon from '@/assets/AddIcon';
 import { Button } from "@/components/ui/button"
-import DateTimePicker from './dateTimePicker';
+import DateTimePicker from './DateTimePicker';
 import ResizableDiv from './ResizableDiv';
+import ToDoTable from './ToDoTable';
+
 Axios.defaults.withCredentials = true
 interface DayState {
 	_id?: string;
@@ -42,6 +44,7 @@ export default function Home() {
 	}, [])
 
 	const fetchToday = async () => {
+		console.log('fetching today ...')
 		if (currState.today) {
 			try {
 				const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/day/read`, {
@@ -220,7 +223,7 @@ export default function Home() {
 	}
 
 	return (
-		<div className="flex relative">
+		<div className="flex relative justify-between">
 			<div id='day' className='relative min-h-fit my-2 px-8'>
 				<div>
 					{/* Hour slots */}
@@ -241,15 +244,15 @@ export default function Home() {
 				</div>
 
 				{/* --- NOW --- */}
-				<div className='absolute h-full w-full left-0 top-0'>
+				<div className='absolute h-full w-[120%] left-0 top-0'>
 					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now}rem` }}></div>
 				</div>
 
 				{/* Chunk render */}
-				<div className='absolute h-full w-full left-0 top-0'>
+				<div className='absolute h-full w-full left-3 top-0'>
 					{day.chunks.map((thisChunk, index) => {
 						return (
-							<div key={index}>
+							<div key={thisChunk._id}>
 								{thisChunk &&
 									<ResizableDiv
 									thisChunk={thisChunk}
@@ -266,7 +269,7 @@ export default function Home() {
 			</div>
 
 
-			<div className='sticky top-0 h-fit'>
+			<div className='sticky top-0 h-screen pr-4'>
 				<h1 className="text-8xl font-bold mb-6">do-it-now</h1>
 
 				<div className='flex flex-col gap-8'>
@@ -298,6 +301,11 @@ export default function Home() {
 						<Button variant="outline" size="icon" onClick={createChunk}>
 							<AddIcon />
 						</Button>
+					</div>
+
+					{/* to-do  */}
+					<div>
+						<ToDoTable />
 					</div>
 
 				</div>

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import DeleteIcon from '@/assets/DeleteIcon';
 import Axios from 'axios';
 
@@ -31,6 +31,7 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
     const isResizing = useRef(false);
     const dragOffset = useRef<number>(0);  // To store the initial offset when dragging
     let myTimer = setTimeout(() => { return }, 1000000000);
+    const [isDeleted, setIsDeleted] = useState<boolean>(false)
 
     useEffect(() => {
         heightRef.current = height;
@@ -61,7 +62,7 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
     const handleDragMouseMove = (e: MouseEvent) => {
         if (resizableRef.current) {
             const scrollTop = window.scrollY || document.documentElement.scrollTop;
-            const newTopInPixels = e.clientY - dragOffset.current + 2*scrollTop;  // Adjust by the offset
+            const newTopInPixels = e.clientY - dragOffset.current + 2 * scrollTop;  // Adjust by the offset
             const newTopInRem = newTopInPixels / 16;
             setTop(newTopInRem);
         }
@@ -105,56 +106,80 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
     };
 
     const updateChunk = async () => {
-        try {
-            const newDuration = heightRef.current / hourHeight;
-            // const newTop = topRef.current / hourHeight;
-            let currDate = new Date(Date.parse(thisChunk.startTime))
-            const diff = (topRef.current - prevTop)/hourHeight
-            console.log(`currDate.getHrs : ${currDate.getHours()} \n
-            prevTop : ${prevTop} \n
-            currTop : ${topRef.current} \n
-            diff : ${diff} `)
-            currDate.setMilliseconds(currDate.getMilliseconds() + diff*60*60*1000)
 
-            const response = await Axios.put(
-                `${import.meta.env.VITE_BACKEND_URL}/chunk/update`,
-                {
-                    _id: thisChunk._id,
-                    duration: newDuration,
-                    startTime: currDate
+        if (!isDeleted) {
+            try {
+                const newDuration = heightRef.current / hourHeight;
+                let currDate = new Date(Date.parse(thisChunk.startTime))
+                const diff = (topRef.current - prevTop) / hourHeight
+                let durChanges = {}, timeChanges = {}
+                // console.log(`currDate.getHrs : ${currDate.getHours()} \n
+                // prevTop : ${prevTop} \n
+                // currTop : ${topRef.current} \n
+                // diff : ${diff} `)
+                currDate.setMilliseconds(currDate.getMilliseconds() + diff * 60 * 60 * 1000)
+                if (newDuration) durChanges = { duration: newDuration }
+                if (diff) timeChanges = { startTime: currDate }
+
+                const response = await Axios.put(
+                    `${import.meta.env.VITE_BACKEND_URL}/chunk/update`,
+                    {
+                        _id: thisChunk._id,
+                        ...durChanges,
+                        ...timeChanges
+                    }
+                );
+                if (response.status === 200) {
+                    setPrevTop(topRef.current)
+                    fetchToday();
+                } else {
+                    console.log('Issue updating the chunk');
                 }
-            );
-            if (response.status === 200) {
-                setPrevTop(topRef.current)
-                fetchToday();
-            } else {
-                console.log('Issue updating the chunk');
+            } catch (err) {
+                console.error('Error updating the chunk:', err);
             }
-        } catch (err) {
-            console.error('Error updating the chunk:', err);
         }
     };
 
+
+    const handleDelete = useCallback(async (chunkId: string) => {
+        console.log(`deleting : ${chunkId}`)
+        setIsDeleted(true);
+        await deleteChunk(chunkId);
+    }, [deleteChunk]);
+
     return (
-        <div
-            ref={resizableRef}
-            className='absolute left-6 border-4 border-sky-900 rounded-lg w-full bg-sky-500/10 cursor-move'
-            style={{
-                top: `${top}rem`,
-                height: `${height}rem`,
-            }}
-            onMouseDown={handleDragMouseDown}  // Initiate dragging
-        >
-            <div className='absolute top-0 right-0' onClick={() => deleteChunk(thisChunk._id)}>
-                <DeleteIcon />
+        <div id='magicdivparent'>
+            <div id='magicdiv'
+                className='absolute left-6 border-r-4 border-red-900 rounded-lg w-full'
+                style={{
+                    top: `${top}rem`,
+                    height: `${height}rem`,
+                }}>
+                <div className='h-full absolute right-2 inset-y-0 cursor-pointer flex items-center' onClick={() => { handleDelete(thisChunk._id) }}>
+                    <DeleteIcon />
+                </div>
             </div>
-            {thisChunk.tasks.map((task, idx) => (
-                <div key={idx}>{task}</div>
-            ))}
+
             <div
-                className='absolute bottom-0 left-0 w-full h-4 cursor-s-resize'
-                onMouseDown={handleResizeMouseDown}  // Initiate resizing
-            ></div>
+                ref={resizableRef}
+                className='absolute left-6 border-4 border-sky-900 rounded-lg w-full bg-sky-500/10 cursor-move'
+                style={{
+                    top: `${top}rem`,
+                    height: `${height}rem`,
+                }}
+                onMouseDown={handleDragMouseDown}  // Initiate dragging
+            >
+                {thisChunk._id}
+                {thisChunk.tasks.map((task, idx) => (
+                    <div key={idx}>{task}</div>
+                ))}
+                <div
+                    className='absolute bottom-0 left-0 w-full h-4 cursor-s-resize'
+                    onMouseDown={handleResizeMouseDown}  // Initiate resizing
+                ></div>
+            </div>
+
         </div>
     );
 };

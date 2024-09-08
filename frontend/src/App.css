@@ -1,0 +1,25 @@
+#magicdiv {
+    width: 100%;
+    height: 100%;
+    content: ' ';
+    display:block;
+    position: absolute;
+    transition: transform linear 300ms;
+    transition-delay: 150ms;
+}
+
+#magicdivparent:hover {
+    #magicdiv {
+        transform: translateX(10%);
+        transition-delay: 0s;
+    }
+}
+
+*::-webkit-scrollbar {
+    display: none;
+  }
+
+*{
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
