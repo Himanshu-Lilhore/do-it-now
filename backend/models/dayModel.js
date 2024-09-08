@@ -9,10 +9,6 @@ const DaySchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    endOfDay: {
-        type: Date,
-        default: null
-    },
     sleep: {
         start: {
             type: Date,

@@ -6,6 +6,7 @@
                 "./src/*"
             ]
         },
+        "types": ["vite/client"],
         "target": "esnext",
         "module": "esnext",
         "moduleResolution": "node",

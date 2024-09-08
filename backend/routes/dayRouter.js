@@ -4,11 +4,11 @@ const {createDay, getDay, updateDay, deleteDay} = require('../controllers/dayCon
 
 router.post('/create', createDay)
 
-router.get('/read', getDay)
+router.post('/read', getDay)
 
 router.put('/update', updateDay)
 
-router.delete('/delete', deleteDay)
+router.post('/delete', deleteDay)
 
 
 module.exports = router; 

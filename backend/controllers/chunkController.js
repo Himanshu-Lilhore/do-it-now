@@ -1,4 +1,5 @@
 const Chunk = require('../models/chunkModel');
+const Day = require('../models/dayModel');
 const Task = require('../models/taskModel');
 
 
@@ -19,7 +20,7 @@ const updateChunk = async (req, res) => {
     try {
         const ChunkId = req.body._id
         const updatedChunk = await Chunk.findByIdAndUpdate(ChunkId, { ...req.body }, { new: true }).populate('tasks');
-        console.log("Chunk updated !!")
+        console.log(`Chunk updated : ${updatedChunk.duration}`)
         res.status(200).json(updatedChunk)
     } catch (err) {
         console.log("Error updating Chunk")
@@ -42,8 +43,12 @@ const getChunk = async (req, res) => {
 const deleteChunk = async (req, res) => {
     try {
         const delChunk = await Chunk.deleteOne({_id: req.body._id})
-        console.log(`Chunk deleted : ${delChunk._id}`)
-        res.status(200).json(`Chunk deleted !`)
+        console.log(`Chunk deleted : ${req.body._id}`)
+        let myDay = await Day.findOne({_id : req.body.day_id})
+        myDay.chunks = myDay.chunks.filter(item => item !== req.body._id)
+        await myDay.save()
+        console.log(`updated day`)
+        res.status(200).json(myDay)
     } catch (err) {
         console.log("Error deleting the Chunk")
         res.status(400).json({ error: err.message })

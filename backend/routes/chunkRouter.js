@@ -8,7 +8,7 @@ router.get('/read', getChunk)
 
 router.put('/update', updateChunk)
 
-router.delete('/delete', deleteChunk)
+router.post('/delete', deleteChunk)
 
 
 module.exports = router; 
