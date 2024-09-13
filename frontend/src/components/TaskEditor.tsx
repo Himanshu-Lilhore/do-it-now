@@ -28,10 +28,11 @@ interface Task {
 }
 interface Props {
     task: Task,
-    fetchTasks: () => void
+    fetchTasks: () => void,
+    fetchToday: () => void 
 }
 
-export function TaskEditor({ task, fetchTasks }: Props) {
+export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
     const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
     const [myTask, setMyTask] = useState<Task>(task)
     const { toast } = useToast()
@@ -70,6 +71,7 @@ export function TaskEditor({ task, fetchTasks }: Props) {
             if (response.status === 200) {
                 console.log(`Task updated successfully : ${response.data.title}`);
                 fetchTasks()
+                fetchToday()
             }
         } catch (err) {
             console.error('Error updating task :', err);
@@ -90,6 +92,7 @@ export function TaskEditor({ task, fetchTasks }: Props) {
                     variant: "destructive"
                 })
                 fetchTasks()
+                fetchToday()
             }
         } catch (err) {
             console.error('Error deleting task :', err);

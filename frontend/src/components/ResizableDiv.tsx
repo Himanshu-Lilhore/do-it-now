@@ -193,6 +193,7 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
                 }
             );
             if (response.status === 200) {
+                fetchTasks();
                 fetchToday();
                 console.log('A task added to the chunk');
             }
@@ -213,6 +214,7 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
                 }
             );
             if (response.status === 200) {
+                fetchTasks();
                 fetchToday();
                 console.log('A task detached from the chunk');
             }
@@ -224,77 +226,87 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
 
     return (
         <div id='magicdivparent'>
-            {/* Edit and Delete */}
             <div id='magicdiv'
-                className='absolute left-6 border-r-4 border-red-900 rounded-lg w-full'
+                className={`${height > 9 ? 'h-[8rem] w-24' : `${height>5?`h-[${Math.floor(height)}rem] w-36`:'h-[2.5rem] w-56'} `} absolute z-20 -right-6 border-r-4 border-transparent hover:border-red-900 rounded-lg items-center`}
                 style={{
                     top: `${top}rem`,
-                    height: `${height}rem`,
                 }}>
-                <div className='h-full absolute right-2 inset-y-0 cursor-pointer flex flex-col justify-around items-center' >
-                    <div>
-                        <Dialog>
-                            <DialogTrigger><EditIcon /></DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Tasks</DialogTitle>
-                                </DialogHeader>
-                                <div>
-                                    <div className="flex flex-col gap-2 max-h-[24rem] overflow-scroll">
-                                        {!(thisChunk.tasks.length) ?
-                                            "No tasks added yet." :
-                                            thisChunk.tasks.map((task, index) => {
-                                                return (
-                                                    <div key={task._id} className='flex flex-row justify-between items-center gap-4 p-4 border hover:border-gray-700 rounded-md'>
-                                                        <div className={`max-w-96 ${task.status === 'done' && 'line-through'}`}>
-                                                            {task.title}
-                                                        </div>
-                                                        <div onClick={() => { deleteTask(thisChunk._id, task._id) }}><DeleteIcon /></div>
-                                                    </div>
-                                                )
-                                            })}
-                                    </div>
-                                </div>
-                                <DialogFooter>
-                                    <Dialog>
-                                        <DialogTrigger><Button variant='outline'>Add more</Button></DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Tasks</DialogTitle>
-                                            </DialogHeader>
-                                            <div className='max-h-[24rem] overflow-scroll'>
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>Title</TableHead>
-                                                            <TableHead>Deadline</TableHead>
-                                                            <TableHead></TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody className="">
-                                                        {tasks && tasks.filter(task => !thisChunk.tasks.some(item => item._id.toString() === task._id.toString())).map((task, index) => {
-                                                            if (task.status !== 'done') {
-                                                                return (
-                                                                    <TableRow key={task._id}>
-                                                                        <TableCell className="font-medium min-w-44">{task.title}</TableCell>
-                                                                        <TableCell className="min-w-24">{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
-                                                                        <TableCell onClick={() => addTask(thisChunk._id, task._id)}><div className='p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
-                                                                    </TableRow>
-                                                                )
-                                                            }
-                                                        })}
-                                                    </TableBody>
-                                                </Table>
-                                            </div>
-                                        </DialogContent>
 
-                                    </Dialog>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
+                <div className={`${height > 5 ? 'flex-col top-1' : 'flex-row top-2 gap-2'} h-full absolute right-2 cursor-pointer flex justify-around items-center`} >
+                    {/* Slot duration  */}
+                    <div className='text-sm flex-row -space-y-1'>
+                        <div>{Math.floor(height / hourHeight)} h</div>
+                        <div>{Math.round(((height / hourHeight) - Math.floor(height / hourHeight)) * 60)} m</div>
                     </div>
-                    <div onClick={() => { handleDelete(thisChunk._id) }}>
-                        <DeleteIcon />
+
+                    <div className={`${height > 9 ? 'flex-col' : 'flex-row'} flex gap-2`}>
+                        {/* Edit  */}
+                        <div>
+                            <Dialog>
+                                <DialogTrigger><EditIcon /></DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Tasks</DialogTitle>
+                                    </DialogHeader>
+                                    <div>
+                                        <div className="flex flex-col gap-2 max-h-[24rem] overflow-scroll">
+                                            {!(thisChunk.tasks.length) ?
+                                                "No tasks added yet." :
+                                                thisChunk.tasks.map((task, index) => {
+                                                    return (
+                                                        <div key={task._id} className='flex flex-row justify-between items-center gap-4 p-4 border hover:border-gray-700 rounded-md'>
+                                                            <div className={`max-w-96 ${task.status === 'done' && 'line-through'}`}>
+                                                                {task.title}
+                                                            </div>
+                                                            <div onClick={() => { deleteTask(thisChunk._id, task._id) }}><DeleteIcon /></div>
+                                                        </div>
+                                                    )
+                                                })}
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Dialog>
+                                            <DialogTrigger><Button variant='outline'>Add more</Button></DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Tasks</DialogTitle>
+                                                </DialogHeader>
+                                                <div className='max-h-[24rem] overflow-scroll'>
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow>
+                                                                <TableHead>Title</TableHead>
+                                                                <TableHead>Deadline</TableHead>
+                                                                <TableHead></TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody className="">
+                                                            {tasks && tasks.filter(task => !thisChunk.tasks.some(item => item._id.toString() === task._id.toString())).map((task, index) => {
+                                                                if (task.status !== 'done') {
+                                                                    return (
+                                                                        <TableRow key={task._id}>
+                                                                            <TableCell className="font-medium min-w-44">{task.title}</TableCell>
+                                                                            <TableCell className="min-w-24">{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
+                                                                            <TableCell onClick={() => addTask(thisChunk._id, task._id)}><div className='p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
+                                                                        </TableRow>
+                                                                    )
+                                                                }
+                                                            })}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                            </DialogContent>
+
+                                        </Dialog>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+
+                        {/* Delete  */}
+                        <div onClick={() => { handleDelete(thisChunk._id) }}>
+                            <DeleteIcon />
+                        </div>
                     </div>
                 </div>
             </div >
@@ -310,7 +322,7 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
                 onMouseDown={handleDragMouseDown}  // Initiate dragging
             >
                 {/* {thisChunk._id} */}
-                <div className='py-3 pl-3 pr-10 flex flex-col gap-3 text-sm'>
+                <div className={`${height > 9 ? 'pr-12' : `${height>5?'pr-20':'pr-28'}`} py-3 pl-3 flex flex-col gap-3 text-sm`}>
                     {thisChunk.tasks.map((task, idx) => (
                         <div className={`bg-black p-2 rounded-md whitespace-nowrap overflow-hidden text-ellipsis ${task.status === 'done' && 'line-through'}`} key={idx}>{task.title}</div>
                     ))}

@@ -111,6 +111,8 @@ export default function Home() {
 	useEffect(() => {
 		startHr = new Date(Date.parse(day.startOfDay)).getHours()
 
+		fetchTasks()
+
 		console.log(`Day updated - \n
 			startOfDay : ${day.startOfDay} \n
 			sleep : ${day.sleep.start} to ${day.sleep.end} \n
@@ -134,7 +136,6 @@ export default function Home() {
 		const nowBarValue = hourHeight * ((diff) / (1000 * 60 * 60));
 		console.log("--- NOW BAR SET ---")
 		setNow(nowBarValue)
-		scrollToCurr()
 	}
 
 
@@ -387,7 +388,7 @@ export default function Home() {
 			</div>
 
 
-			<div className='sticky top-0 h-screen pr-4'>
+			<div className='fixed top-0 right-0 h-screen pr-4'>
 				<h1 className="text-8xl font-bold mb-6">do-it-now</h1>
 
 				<div className='flex flex-col gap-8'>
@@ -433,7 +434,7 @@ export default function Home() {
 
 					{/* to-do  */}
 					<div>
-						<ToDoTable tasks={tasks} fetchTasks={fetchTasks}/>
+						<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday}/>
 					</div>
 				</div>
 			</div>

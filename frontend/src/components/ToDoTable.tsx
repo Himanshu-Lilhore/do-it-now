@@ -25,7 +25,7 @@ interface Task {
 
 
 
-export default function ToDoTable({ tasks, fetchTasks }: { tasks: Task[], fetchTasks: () => void }) {
+export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void }) {
     const [input, setInput] = useState<string>('')
 
     useEffect(() => {
@@ -64,6 +64,7 @@ export default function ToDoTable({ tasks, fetchTasks }: { tasks: Task[], fetchT
             if (response.status === 200) {
                 console.log('Task updated successfully');
                 fetchTasks()
+                fetchToday()
             }
         } catch (err) {
             console.error('Error updating task :', err);
@@ -92,7 +93,7 @@ export default function ToDoTable({ tasks, fetchTasks }: { tasks: Task[], fetchT
                                     <TableCell className="font-medium max-w-64 whitespace-nowrap hover:whitespace-normal overflow-hidden text-ellipsis">{task.title}</TableCell>
                                     <TableCell>{task.status}</TableCell>
                                     <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
-                                    <TableCell><TaskEditor task={task} fetchTasks={fetchTasks} /></TableCell>
+                                    <TableCell><TaskEditor task={task} fetchTasks={fetchTasks} fetchToday={fetchToday} /></TableCell>
                                 </TableRow>
                             )
                         })}
