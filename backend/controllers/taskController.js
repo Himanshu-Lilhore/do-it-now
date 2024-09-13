@@ -20,7 +20,7 @@ const updateTask = async (req, res) => {
         const taskId = req.body._id
         console.log(taskId)
         const updatedTask = await Task.findByIdAndUpdate(taskId, { ...req.body }, { new: true });
-        console.log(`Task updated !! ${updatedTask.deadline.getDate()}`)
+        console.log(`Task updated !!`)
         res.status(200).json(updatedTask)
     } catch (err) {
         console.log("Error updating task")
@@ -41,10 +41,32 @@ const getTask = async (req, res) => {
 
 const getManyTasks = async (req, res) => {
     try {
-        const allTasks = await Task.find({...req.body}).populate('tags').sort({ createdAt: -1 })
+        const aggregatedTasks = await Task.aggregate([
+            {
+                $match: req.body
+            },
+            {
+                $addFields: {
+                    statusOrder: {
+                        $cond: { if: { $eq: ["$status", "done"] }, then: 1, else: 0 }
+                    }
+                }
+            },
+            {
+                $sort: {
+                    statusOrder: 1,
+                    updatedAt: -1,
+                    createdAt: -1
+                }
+            }
+        ]);
 
-        if (!allTasks)
-            console.log("No tasks found !")
+        if (!aggregatedTasks || aggregatedTasks.length === 0) {
+            console.log("No tasks found !");
+            return res.status(404).json({ message: "No tasks found" });
+        }
+
+        const allTasks = await Task.populate(aggregatedTasks, { path: 'tags' });
 
         res.status(200).json(allTasks)
     } catch (err) {

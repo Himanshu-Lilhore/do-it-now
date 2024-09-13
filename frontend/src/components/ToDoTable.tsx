@@ -25,7 +25,7 @@ interface Task {
 
 
 
-export default function ToDoTable({tasks, fetchTasks} : {tasks: Task[], fetchTasks: () => void}) {
+export default function ToDoTable({ tasks, fetchTasks }: { tasks: Task[], fetchTasks: () => void }) {
     const [input, setInput] = useState<string>('')
 
     useEffect(() => {
@@ -38,14 +38,14 @@ export default function ToDoTable({tasks, fetchTasks} : {tasks: Task[], fetchTas
     }
 
     const createTask = async () => {
-        if(!input) return
+        if (!input) return
         console.log('creating tasks ...')
         try {
             const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/task/create`, {
                 title: input,
                 status: 'pending'
             })
-            if(response.status === 200) {
+            if (response.status === 200) {
                 console.log('Task created successfully');
                 setInput('')
                 fetchTasks()
@@ -54,6 +54,21 @@ export default function ToDoTable({tasks, fetchTasks} : {tasks: Task[], fetchTas
             console.error('Error creating task :', err);
         }
     }
+
+    const handleCheckboxChange = async (currStatus: string, id: string) => {
+        try {
+            const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+                status: currStatus === 'done' ? 'pending' : 'done',
+                _id: id
+            })
+            if (response.status === 200) {
+                console.log('Task updated successfully');
+                fetchTasks()
+            }
+        } catch (err) {
+            console.error('Error updating task :', err);
+        }
+    };
 
     return (
         <div className="flex flex-col gap-4">
@@ -73,8 +88,8 @@ export default function ToDoTable({tasks, fetchTasks} : {tasks: Task[], fetchTas
                         {tasks && tasks.map((task, index) => {
                             return (
                                 <TableRow key={task._id}>
-                                    <TableCell><Checkbox /></TableCell>
-                                    <TableCell className="font-medium max-w-64">{task.title}</TableCell>
+                                    <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
+                                    <TableCell className="font-medium max-w-64 whitespace-nowrap hover:whitespace-normal overflow-hidden text-ellipsis">{task.title}</TableCell>
                                     <TableCell>{task.status}</TableCell>
                                     <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
                                     <TableCell><TaskEditor task={task} fetchTasks={fetchTasks} /></TableCell>

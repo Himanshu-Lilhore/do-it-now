@@ -20,7 +20,7 @@ interface Chunk {
 	startTime: string;
 	duration: number;
 	rating: number;
-	tasks: string[];
+	tasks: Task[];
 }
 interface Task {
     _id: string,
@@ -40,6 +40,7 @@ export default function Home() {
 	const [isSettingEOD, setIsSettingEOD] = useState<boolean>(false)
 	const hourHeight = 4  // rem
 	let myTimer = setInterval(() => { return }, 100000000)
+	let startHr = new Date(Date.parse(day.startOfDay)).getHours()
 	const flipFunctionalityTimer: React.MutableRefObject<number | undefined> = useRef(undefined);
 	const [tasks, setTasks] = useState<Task[]>([
         {
@@ -108,6 +109,8 @@ export default function Home() {
 
 
 	useEffect(() => {
+		startHr = new Date(Date.parse(day.startOfDay)).getHours()
+
 		console.log(`Day updated - \n
 			startOfDay : ${day.startOfDay} \n
 			sleep : ${day.sleep.start} to ${day.sleep.end} \n
@@ -182,7 +185,10 @@ export default function Home() {
 	const refresh = async () => {
 		fetchState()
 		fetchTasks()
+		clearInterval(myTimer)
+		setBar()
 	}
+	
 
 	const createChunk = async () => {
 		try {
@@ -232,7 +238,6 @@ export default function Home() {
 		}
 	}
 
-	const startHr = new Date(Date.parse(day.startOfDay)).getHours()
 
 	function getHour(val: number) {
 		if (val === 12) return '12 pm'
@@ -371,6 +376,8 @@ export default function Home() {
 										getChunkDepth={getChunkDepth}
 										deleteChunk={deleteChunk}
 										fetchToday={fetchToday}
+										tasks={tasks}
+										fetchTasks={fetchTasks}
 									/>
 								}
 							</div>
