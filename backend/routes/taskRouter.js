@@ -9,7 +9,7 @@ router.get('/readMany', getManyTasks)
 
 router.put('/update', updateTask)
 
-router.delete('/delete', deleteTask)
+router.post('/delete', deleteTask)
 
 
 module.exports = router; 

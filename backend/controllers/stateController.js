@@ -4,7 +4,6 @@ const Tag = require('../models/tagModel');
 const Task = require('../models/taskModel');
 const CurrState = require('../models/currStateModel')
 const Axios = require('axios');
-const { createDateInIST } = require('../util/functions');
 
 
 const setCurrState = async (req, res) => {
@@ -16,7 +15,7 @@ const setCurrState = async (req, res) => {
             })
             console.log("Created fresh state !")
         } else {
-            updatedState = { updatedState, ...req.body }
+            updatedState.set(req.body);
             await updatedState.save()
         }
         console.log("State set successfully !")
@@ -81,11 +80,11 @@ const handleEOD = async (req, res) => {
 
         if (currState.state === 'awake') {
             currState.state = 'asleep'
-            thisDay.sleep.start = createDateInIST()
+            thisDay.sleep.start = new Date()
             console.log("Sleeping now.. 😴")
         } else {
             currState.state = 'awake'
-            thisDay.sleep.end = createDateInIST()
+            thisDay.sleep.end = new Date()
             currState.dayLength = Math.round((thisDay.sleep.end - thisDay.sleep.start)/(1000*60*60))
             const newDay = await Axios.post(`${process.env.BACKEND_URL}day/create`)
             currState.today = newDay.data._id

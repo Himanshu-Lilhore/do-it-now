@@ -11,4 +11,4 @@ router.put('/update', updateDay)
 router.post('/delete', deleteDay)
 
 
-module.exports = router; 
+module.exports = router;

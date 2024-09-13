@@ -1,14 +1,13 @@
 const Day = require('../models/dayModel');
 const Task = require('../models/taskModel');
 const Chunk = require('../models/chunkModel');
-const { createDateInIST } = require('../util/functions');
 
 
 const createDay = async (req, res) => {
     try {
         console.log("creating day...")
         const newDay = await Day.create({
-            startOfDay: createDateInIST(),
+            startOfDay: new Date(),
             ...req.body
         })
         console.log("Day created !!")

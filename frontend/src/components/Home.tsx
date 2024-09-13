@@ -22,21 +22,58 @@ interface Chunk {
 	rating: number;
 	tasks: string[];
 }
+interface Task {
+    _id: string,
+    title: string,
+    description: string,
+    deadline: Date,
+    status: string,
+    tags: string[]
+}
 
 
 export default function Home() {
 	const ref = useRef<HTMLDivElement>(null);
 	const [day, setDay] = useState<DayState>({ startOfDay: '01 Jan 1970 00:00:00 GMT', chunks: [], sleep: { start: null, end: null }, chunksRemaining: null })
 	const [currState, setCurrState] = useState({ state: null, today: null, dayLength: 24 })
-	const [now, setNow] = useState<number>(0)
+	const [now, setNow] = useState<number>(0)   // hourHeight * number of wake hrs passed
+	const [isSettingEOD, setIsSettingEOD] = useState<boolean>(false)
 	const hourHeight = 4  // rem
 	let myTimer = setInterval(() => { return }, 100000000)
+	const flipFunctionalityTimer: React.MutableRefObject<number | undefined> = useRef(undefined);
+	const [tasks, setTasks] = useState<Task[]>([
+        {
+            _id: 'default',
+            title: 'Default Task',
+            description: 'This is a default task description.',
+            deadline: new Date(), // Set to current date/time
+            status: 'pending',
+            tags: ['tag1']
+        }
+    ]);
+
+
+	const fetchTasks = async () => {
+        console.log('fetching tasks ...')
+        try {
+            const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`)
+            console.log('Tasks fetched successfully');
+            setTasks(response.data)
+        } catch (err) {
+            console.error('Error fetching tasks :', err);
+        }
+    }
 
 	const timeFormat: Intl.DateTimeFormatOptions = {
 		hour12: true,
 		hour: 'numeric',
-		minute: 'numeric'
+		minute: 'numeric',
 	};
+
+	function showDateTime(theDate: string) {
+		return `${new Date(Date.parse(day.startOfDay)).toISOString().split('T')[0]} | ${new Date(Date.parse(day.startOfDay)).toLocaleTimeString('en-US', timeFormat)}`
+	}
+	
 
 	useEffect(() => {
 		fetchState()
@@ -56,6 +93,7 @@ export default function Home() {
 			}
 		}
 	}
+	
 	useEffect(() => {
 		console.log(`State updated - \n
 			state: ${currState.state} \n
@@ -125,6 +163,7 @@ export default function Home() {
 
 
 	const fetchState = async () => {
+		console.log("Fetching state...")
 		try {
 			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/state/read`);
 			if (response.status === 200) {
@@ -139,6 +178,11 @@ export default function Home() {
 		}
 	}
 
+
+	const refresh = async () => {
+		fetchState()
+		fetchTasks()
+	}
 
 	const createChunk = async () => {
 		try {
@@ -222,6 +266,73 @@ export default function Home() {
 		}
 	}
 
+	const setDayID = async (dayID: string) => {
+		try {
+			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/state/set`, {today: dayID});
+			if (response.status === 200) {
+				console.log("State updated successfully");
+				setCurrState(response.data)
+			}
+			else {
+				console.log("Issue setting the state");
+			}
+		} catch (error) {
+			console.error('Error setting the state :', error);
+		}
+	}
+
+	const createNewDay = async () => {
+		try {
+			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/day/create`, {});
+			if (response.status === 200) {
+				console.log(`subsequent day created successfully`);
+				setDayID(response.data._id)
+			}
+			else {
+				console.log("Issue creating subsequent day");
+			}
+		} catch (error) {
+			console.error('Error creating subsequent day : ', error);
+		}
+	}
+
+
+	const setDayFinish = async (newDate: Date) => {
+		try {
+			const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/day/update`, {
+				_id: currState.today,
+				sleep: {...day.sleep, end:newDate}
+			});
+			if (response.status === 200) {
+				console.log(`Day ended successfully : ${newDate}`);
+				setDay(response.data)
+				await createNewDay()
+			}
+			else {
+				console.log("Issue ending day");
+			}
+		} catch (error) {
+			console.error('Error ending day : ', error);
+		}
+	}
+
+	useEffect(() => {
+		console.log(`isSettingEOD : ${isSettingEOD}`)
+	}, [isSettingEOD])
+
+
+	function flipFunctionality () {
+		if(!isSettingEOD) {
+			setIsSettingEOD(true)
+			flipFunctionalityTimer.current = setTimeout(() => {
+				setIsSettingEOD(false)
+			}, 5000)
+		} else {
+			clearTimeout(flipFunctionalityTimer.current)
+		}
+	}
+
+
 	return (
 		<div className="flex relative justify-between">
 			<div id='day' className='relative min-h-fit my-2 px-8'>
@@ -245,7 +356,7 @@ export default function Home() {
 
 				{/* --- NOW --- */}
 				<div className='absolute h-full w-[120%] left-0 top-0'>
-					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now}rem` }}></div>
+					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now/hourHeight<=currState.dayLength ? now : currState.dayLength*hourHeight}rem` }}></div>
 				</div>
 
 				{/* Chunk render */}
@@ -255,12 +366,12 @@ export default function Home() {
 							<div key={thisChunk._id}>
 								{thisChunk &&
 									<ResizableDiv
-									thisChunk={thisChunk}
-									hourHeight={hourHeight}
-									getChunkDepth={getChunkDepth}
-									deleteChunk={deleteChunk}
-									fetchToday={fetchToday}
-								  />
+										thisChunk={thisChunk}
+										hourHeight={hourHeight}
+										getChunkDepth={getChunkDepth}
+										deleteChunk={deleteChunk}
+										fetchToday={fetchToday}
+									/>
 								}
 							</div>
 						)
@@ -275,13 +386,23 @@ export default function Home() {
 				<div className='flex flex-col gap-8'>
 					{/* Pick start of day */}
 					<div className='flex flex-row items-center my-4 justify-end'>
-						<div className='mr-4'>
-							Start of day :
+						<div className='mr-4' onClick={flipFunctionality}>
+							{
+								(!isSettingEOD) ?
+									<p>Start of day :</p> :
+									<div onFocus={() => setIsSettingEOD(true)} tabIndex={0}>
+										<DateTimePicker
+											date={new Date()}
+											setDate={setDayFinish}
+											title='Set EOD'
+											onBtnClick={() => setIsSettingEOD(false)} />
+									</div>
+							}
 						</div>
 						<DateTimePicker
-							date={new Date(Date.parse(day.startOfDay))}
-							setStartDateTime={setStartDateTime}
-							title={`${new Date(Date.parse(day.startOfDay)).toISOString().split('T')[0]} | ${new Date(Date.parse(day.startOfDay)).toLocaleTimeString('en-US', timeFormat)}`}
+							date={new Date(day.startOfDay)}
+							setDate={setStartDateTime}
+							title={`${showDateTime(day.startOfDay)}`}
 						/>
 					</div>
 
@@ -294,7 +415,7 @@ export default function Home() {
 							{!currState.state && '⌛'}
 						</Button>
 
-						<Button variant="outline" size="icon" onClick={fetchState}>
+						<Button variant="outline" size="icon" onClick={refresh}>
 							<RefreshIcon />
 						</Button>
 
@@ -305,13 +426,10 @@ export default function Home() {
 
 					{/* to-do  */}
 					<div>
-						<ToDoTable />
+						<ToDoTable tasks={tasks} fetchTasks={fetchTasks}/>
 					</div>
-
 				</div>
-
 			</div>
-
 		</div>
 	);
 };

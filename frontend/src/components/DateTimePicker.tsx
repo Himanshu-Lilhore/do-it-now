@@ -14,13 +14,14 @@ import ShadSelect from "./ui/ShadSelect"
 interface Props {
     title: String,
     date: Date;
-    setStartDateTime: (time: Date) => void;
+    setDate: (time: Date) => void;
+    onBtnClick?: () => void;
 }
 import { Calendar } from "@/components/ui/calendar"
 import { useState, useEffect } from 'react'
 
 
-export default function DateTimePicker({ title, date, setStartDateTime }: Props) {
+export default function DateTimePicker({ title, date, setDate, onBtnClick }: Props) {
     const [currDate, setCurrDate] = useState<Date>(date)
     const [calDate, setCalDate] = useState<undefined | Date>(date)
 
@@ -38,8 +39,13 @@ export default function DateTimePicker({ title, date, setStartDateTime }: Props)
                 currDate.getMinutes(),
                 currDate.getSeconds()
             );
-            setStartDateTime(newVal);
+            setDate(newVal);
         }
+        if(onBtnClick) onBtnClick()
+    }
+
+    function handleCancel() {
+        if(onBtnClick) onBtnClick()
     }
     
 
@@ -63,7 +69,7 @@ export default function DateTimePicker({ title, date, setStartDateTime }: Props)
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Pick start of day :</AlertDialogTitle>
+                    <AlertDialogTitle>Pick datetime :</AlertDialogTitle>
                         <div className="flex flex-row gap-6 pt-2">
                             <div className="flex flex-col gap-6">
                                 <ShadSelect title='hrs' length={24} onValueChange={setHr} />
@@ -82,7 +88,7 @@ export default function DateTimePicker({ title, date, setStartDateTime }: Props)
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={handleSubmit}>Submit</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

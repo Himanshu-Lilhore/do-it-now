@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import StatusSelect from "./ui/StatusSelect"
 import { Textarea } from "@/components/ui/textarea"
 import { useState, useEffect } from 'react'
 import { Calendar } from "@/components/ui/calendar"
 import Axios from 'axios'
+import { useToast } from "@/hooks/use-toast"
+
 import {
     Sheet,
     SheetClose,
@@ -30,8 +32,9 @@ interface Props {
 }
 
 export function TaskEditor({ task, fetchTasks }: Props) {
-    const [calDate, setCalDate] = useState<Date|undefined>(new Date(task.deadline))
+    const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
     const [myTask, setMyTask] = useState<Task>(task)
+    const { toast } = useToast()
 
 
     function handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
@@ -41,12 +44,14 @@ export function TaskEditor({ task, fetchTasks }: Props) {
         }));
     }
 
-    function handleStatus(e: React.ChangeEvent<HTMLInputElement>) {
+    function handleStatus(val: string) {
         setMyTask(prev => ({
             ...prev,
-            status: e.target.value
+            status: val
         }));
     }
+
+
 
     function handleDescription(e: React.ChangeEvent<HTMLTextAreaElement>) {
         setMyTask(prev => ({
@@ -68,6 +73,26 @@ export function TaskEditor({ task, fetchTasks }: Props) {
             }
         } catch (err) {
             console.error('Error updating task :', err);
+        }
+    }
+
+    const handleDelete = async () => {
+        console.log('Deleting task ...')
+        try {
+            const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/task/delete`, {
+                _id: myTask._id
+            })
+            if (response.status === 200) {
+                console.log(`Task deleted successfully : ${response.data}`);
+                toast({
+                    title: "Task deleted 🗑️",
+                    description: myTask.title,
+                    variant: "destructive"
+                })
+                fetchTasks()
+            }
+        } catch (err) {
+            console.error('Error deleting task :', err);
         }
     }
 
@@ -101,20 +126,7 @@ export function TaskEditor({ task, fetchTasks }: Props) {
                         <Label htmlFor="status" className="text-right">
                             Status
                         </Label>
-                        <RadioGroup defaultValue={myTask.status} className="col-span-3" onChange={handleStatus}>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="pending" id="r1" />
-                                <Label htmlFor="r1">Pending</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="in-progress" id="r2" />
-                                <Label htmlFor="r2">In-progress</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="done" id="r3" />
-                                <Label htmlFor="r3">Done</Label>
-                            </div>
-                        </RadioGroup>
+                        <StatusSelect title={myTask.status} onValueChange={handleStatus} />
                     </div>
 
                     {/* Deadline  */}
@@ -148,7 +160,10 @@ export function TaskEditor({ task, fetchTasks }: Props) {
                     </div>
 
                 </div>
-                <SheetFooter>
+                <SheetFooter className="flex flex-row justify-between w-full">
+                    <SheetClose asChild>
+                        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+                    </SheetClose>
                     <SheetClose asChild>
                         <Button type="submit" onClick={handleSubmit}>Save changes</Button>
                     </SheetClose>

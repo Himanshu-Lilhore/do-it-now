@@ -20,7 +20,7 @@ const updateTask = async (req, res) => {
         const taskId = req.body._id
         console.log(taskId)
         const updatedTask = await Task.findByIdAndUpdate(taskId, { ...req.body }, { new: true });
-        console.log(`Task updated !! ${updatedTask.deadline.getUTCDate()}`)
+        console.log(`Task updated !! ${updatedTask.deadline.getDate()}`)
         res.status(200).json(updatedTask)
     } catch (err) {
         console.log("Error updating task")
@@ -41,7 +41,7 @@ const getTask = async (req, res) => {
 
 const getManyTasks = async (req, res) => {
     try {
-        const allTasks = await Task.find({...req.body}).populate('tags')
+        const allTasks = await Task.find({...req.body}).populate('tags').sort({ createdAt: -1 })
 
         if (!allTasks)
             console.log("No tasks found !")

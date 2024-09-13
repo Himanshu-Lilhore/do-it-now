@@ -24,34 +24,13 @@ interface Task {
 }
 
 
-export default function ToDoTable() {
-    const [tasks, setTasks] = useState<Task[]>([
-        {
-            _id: 'default',
-            title: 'Default Task',
-            description: 'This is a default task description.',
-            deadline: new Date(), // Set to current date/time
-            status: 'pending',
-            tags: ['tag1']
-        }
-    ]);
+
+export default function ToDoTable({tasks, fetchTasks} : {tasks: Task[], fetchTasks: () => void}) {
     const [input, setInput] = useState<string>('')
 
     useEffect(() => {
         fetchTasks()
     }, [])
-
-
-    const fetchTasks = async () => {
-        console.log('fetching tasks ...')
-        try {
-            const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`)
-            console.log('Tasks fetched successfully');
-            setTasks(response.data)
-        } catch (err) {
-            console.error('Error fetching tasks :', err);
-        }
-    }
 
 
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -69,6 +48,7 @@ export default function ToDoTable() {
             if(response.status === 200) {
                 console.log('Task created successfully');
                 setInput('')
+                fetchTasks()
             }
         } catch (err) {
             console.error('Error creating task :', err);
@@ -96,7 +76,7 @@ export default function ToDoTable() {
                                     <TableCell><Checkbox /></TableCell>
                                     <TableCell className="font-medium max-w-64">{task.title}</TableCell>
                                     <TableCell>{task.status}</TableCell>
-                                    <TableCell>{}</TableCell>
+                                    <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
                                     <TableCell><TaskEditor task={task} fetchTasks={fetchTasks} /></TableCell>
                                 </TableRow>
                             )
