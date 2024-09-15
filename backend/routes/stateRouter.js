@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getCurrState, setCurrState, handleEOD } = require('../controllers/stateController');
+const { getCurrState, setCurrState, predict } = require('../controllers/stateController');
 
 router.get('/read', getCurrState)
+router.get('/predict', predict)
 router.post('/set', setCurrState)
-router.post('/EOD', handleEOD)
 
 
 module.exports = router;

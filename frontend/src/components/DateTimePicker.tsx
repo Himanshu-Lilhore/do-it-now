@@ -15,13 +15,12 @@ interface Props {
     title: String,
     date: Date;
     setDate: (time: Date) => void;
-    onBtnClick?: () => void;
 }
 import { Calendar } from "@/components/ui/calendar"
 import { useState, useEffect } from 'react'
 
 
-export default function DateTimePicker({ title, date, setDate, onBtnClick }: Props) {
+export default function DateTimePicker({ title, date, setDate }: Props) {
     const [currDate, setCurrDate] = useState<Date>(date)
     const [calDate, setCalDate] = useState<undefined | Date>(date)
 
@@ -41,13 +40,8 @@ export default function DateTimePicker({ title, date, setDate, onBtnClick }: Pro
             );
             setDate(newVal);
         }
-        if(onBtnClick) onBtnClick()
     }
 
-    function handleCancel() {
-        if(onBtnClick) onBtnClick()
-    }
-    
 
     function setHr(val: string) {
         setCurrDate(prev => {
@@ -88,7 +82,7 @@ export default function DateTimePicker({ title, date, setDate, onBtnClick }: Pro
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={handleCancel}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={handleSubmit}>Submit</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

@@ -287,7 +287,7 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
                                                                         <TableRow key={task._id}>
                                                                             <TableCell className="font-medium min-w-44">{task.title}</TableCell>
                                                                             <TableCell className="min-w-24">{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
-                                                                            <TableCell onClick={() => addTask(thisChunk._id, task._id)}><div className='p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
+                                                                            <TableCell onClick={() => addTask(thisChunk._id, task._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
                                                                         </TableRow>
                                                                     )
                                                                 }

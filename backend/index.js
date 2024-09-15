@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const connectDB = require('./config/db')
 const PORT = process.env.PORT
 const stateRouter = require('./routes/stateRouter')
+const statRouter = require('./routes/statRouter')
 const taskRouter = require('./routes/taskRouter')
 const chunkRouter = require('./routes/chunkRouter')
 const dayRouter = require('./routes/dayRouter')
@@ -32,6 +33,7 @@ app.use('/state', stateRouter)
 app.use('/task', taskRouter)
 app.use('/chunk', chunkRouter)
 app.use('/day', dayRouter)
+app.use('/stat', statRouter)
 
 
 app.listen(PORT, () => {

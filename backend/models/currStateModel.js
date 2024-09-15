@@ -11,9 +11,18 @@ const CurrStateSchema = new mongoose.Schema({
         ref: 'Day',
         default: null
     },
-    dayLength: {
+    yesterday: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Day',
+        default: null
+    },
+    workHrs: {
         type: Number,
-        default: 24
+        default: 16
+    },
+    sleepHrs: {
+        type: Number,
+        default: 8
     }
 }, {timestamps: true});
 

@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button"
 import DateTimePicker from './DateTimePicker';
 import ResizableDiv from './ResizableDiv';
 import ToDoTable from './ToDoTable';
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog"
+import { toast } from '@/hooks/use-toast';
 
 Axios.defaults.withCredentials = true
 interface DayState {
@@ -23,58 +33,67 @@ interface Chunk {
 	tasks: Task[];
 }
 interface Task {
-    _id: string,
-    title: string,
-    description: string,
-    deadline: Date,
-    status: string,
-    tags: string[]
+	_id: string,
+	title: string,
+	description: string,
+	deadline: Date,
+	status: string,
+	tags: string[]
 }
 
 
 export default function Home() {
 	const ref = useRef<HTMLDivElement>(null);
 	const [day, setDay] = useState<DayState>({ startOfDay: '01 Jan 1970 00:00:00 GMT', chunks: [], sleep: { start: null, end: null }, chunksRemaining: null })
-	const [currState, setCurrState] = useState({ state: null, today: null, dayLength: 24 })
+	const [currState, setCurrState] = useState({ state: null, today: null, workHrs: 16, sleepHrs: 8, yesterday: null })
 	const [now, setNow] = useState<number>(0)   // hourHeight * number of wake hrs passed
-	const [isSettingEOD, setIsSettingEOD] = useState<boolean>(false)
 	const hourHeight = 4  // rem
 	let myTimer = setInterval(() => { return }, 100000000)
 	let startHr = new Date(Date.parse(day.startOfDay)).getHours()
-	const flipFunctionalityTimer: React.MutableRefObject<number | undefined> = useRef(undefined);
 	const [tasks, setTasks] = useState<Task[]>([
-        {
-            _id: 'default',
-            title: 'Default Task',
-            description: 'This is a default task description.',
-            deadline: new Date(), // Set to current date/time
-            status: 'pending',
-            tags: ['tag1']
-        }
-    ]);
+		{
+			_id: 'default',
+			title: 'Default Task',
+			description: 'This is a default task description.',
+			deadline: new Date(), // Set to current date/time
+			status: 'pending',
+			tags: ['tag1']
+		}
+	]);
 
 
 	const fetchTasks = async () => {
-        console.log('fetching tasks ...')
-        try {
-            const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`)
-            console.log('Tasks fetched successfully');
-            setTasks(response.data)
-        } catch (err) {
-            console.error('Error fetching tasks :', err);
-        }
-    }
+		console.log('fetching tasks ...')
+		try {
+			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`)
+			console.log('Tasks fetched successfully');
+			setTasks(response.data)
+		} catch (err) {
+			console.error('Error fetching tasks :', err);
+		}
+	}
 
-	const timeFormat: Intl.DateTimeFormatOptions = {
-		hour12: true,
-		hour: 'numeric',
-		minute: 'numeric',
-	};
 
 	function showDateTime(theDate: string) {
-		return `${new Date(Date.parse(day.startOfDay)).toISOString().split('T')[0]} | ${new Date(Date.parse(day.startOfDay)).toLocaleTimeString('en-US', timeFormat)}`
+		const timeFormat: Intl.DateTimeFormatOptions = {
+			hour12: true,
+			hour: 'numeric',
+			minute: 'numeric',
+		};
+		const parsedDate = new Date(theDate);
+
+		const day = parsedDate.getDate().toString().padStart(2, '0');
+		const month = parsedDate.toLocaleString('en-US', { month: 'short' });
+		const year = parsedDate.getFullYear().toString().slice(-2);
+
+		const datePart = `${day} ${month} ${year}`;
+
+		const timePart = parsedDate.toLocaleTimeString('en-US', timeFormat);
+
+		return `${timePart} | ${datePart}`;
 	}
-	
+
+
 
 	useEffect(() => {
 		fetchState()
@@ -94,12 +113,14 @@ export default function Home() {
 			}
 		}
 	}
-	
+
 	useEffect(() => {
-		console.log(`State updated - \n
-			state: ${currState.state} \n
-			today : ${currState.today} \n
-			dayLength : ${currState.dayLength}`)
+		console.log(`State updated -
+			state: ${currState.state}
+			today : ${currState.today}
+			workHrs : ${currState.workHrs}
+			sleepHrs : ${currState.sleepHrs}
+			yesterday : ${currState.yesterday}`)
 		const updateDay = async () => {
 			fetchToday()
 		}
@@ -133,7 +154,7 @@ export default function Home() {
 		const rightNow = Date.now()
 		const dayStart = (new Date(Date.parse(day.startOfDay))).getTime()
 		const diff = rightNow - dayStart
-		const nowBarValue = hourHeight * ((diff) / (1000 * 60 * 60));
+		const nowBarValue = hourHeight * ((diff) / (1000 * 60 * 60) + (new Date(Date.parse(day.startOfDay)).getMinutes()) / (60)) ;
 		console.log("--- NOW BAR SET ---")
 		setNow(nowBarValue)
 	}
@@ -147,21 +168,6 @@ export default function Home() {
 					block: 'center',
 				});
 			}, 100)
-		}
-	}
-
-	const changeState = async () => {
-		try {
-			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/state/EOD`);
-			if (response.status === 200) {
-				console.log("State updated successfully");
-				setCurrState(response.data)
-			}
-			else {
-				console.log("Issue setting the state");
-			}
-		} catch (error) {
-			console.error('Error setting the state :', error);
 		}
 	}
 
@@ -189,7 +195,7 @@ export default function Home() {
 		clearInterval(myTimer)
 		setBar()
 	}
-	
+
 
 	const createChunk = async () => {
 		try {
@@ -239,6 +245,13 @@ export default function Home() {
 		}
 	}
 
+	const calcTime = (startOfDayStr: string, dayLengthInHours: number) => {
+		let startOfDay = new Date(Date.parse(startOfDayStr));
+		startOfDay.setHours(startOfDay.getHours() + dayLengthInHours);
+		return startOfDay.toISOString()
+	};
+
+
 
 	function getHour(val: number) {
 		if (val === 12) return '12 pm'
@@ -250,7 +263,7 @@ export default function Home() {
 	function getChunkDepth(val: string) {
 		const chunkDt = new Date(Date.parse(val)).getTime()
 		const startOfDay = new Date(day.startOfDay).getTime()
-		const diff = (chunkDt - startOfDay) / (1000 * 60 * 60)
+		const diff = (chunkDt - startOfDay) / (1000 * 60 * 60) + (new Date(Date.parse(day.startOfDay)).getMinutes()) / (60)
 		return diff * hourHeight
 	}
 
@@ -272,9 +285,9 @@ export default function Home() {
 		}
 	}
 
-	const setDayID = async (dayID: string) => {
+	const setDayID = async (newDay: string) => {
 		try {
-			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/state/set`, {today: dayID});
+			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/state/set`, { today: newDay, yesterday: currState.today });
 			if (response.status === 200) {
 				console.log("State updated successfully");
 				setCurrState(response.data)
@@ -287,15 +300,39 @@ export default function Home() {
 		}
 	}
 
-	const createNewDay = async () => {
+	const calcStats = async () => {
 		try {
-			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/day/create`, {});
+			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/stat/calcAvg`);
 			if (response.status === 200) {
-				console.log(`subsequent day created successfully`);
-				setDayID(response.data._id)
+				console.log("Stats calculated successfully");
+				setCurrState(response.data)
 			}
 			else {
-				console.log("Issue creating subsequent day");
+				console.log("Issue calculating stats");
+			}
+		} catch (error) {
+			console.error('Error calculating the stats :', error);
+		}
+	} 
+
+	const createNewDay = async () => {
+		try {
+			if (day.sleep.start && day.sleep.end) {
+				const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/day/create`, {});
+				if (response.status === 200) {
+					console.log(`subsequent day created successfully`);
+					calcStats()
+					setDayID(response.data._id)
+					predictDayLen()
+				}
+				else {
+					console.log("Issue creating subsequent day");
+				}
+			} else {
+				toast({
+					title: "Can't create new day",
+					description: "Before creating new day sleep start & end needs to be populated"
+				})
 			}
 		} catch (error) {
 			console.error('Error creating subsequent day : ', error);
@@ -303,38 +340,54 @@ export default function Home() {
 	}
 
 
-	const setDayFinish = async (newDate: Date) => {
+	const predictDayLen = async () => {
 		try {
-			const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/day/update`, {
-				_id: currState.today,
-				sleep: {...day.sleep, end:newDate}
-			});
+			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/state/predict`);
 			if (response.status === 200) {
-				console.log(`Day ended successfully : ${newDate}`);
-				setDay(response.data)
-				await createNewDay()
+				console.log(`Prediction successful`);
+				setCurrState(response.data)
 			}
 			else {
-				console.log("Issue ending day");
+				console.log("Issue doing prediction");
 			}
 		} catch (error) {
-			console.error('Error ending day : ', error);
+			console.error('Error with prediction : ', error);
 		}
 	}
 
-	useEffect(() => {
-		console.log(`isSettingEOD : ${isSettingEOD}`)
-	}, [isSettingEOD])
+	const setSleepEnd = async (newDate: Date) => {
+		try {
+			const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/day/update`, {
+				_id: currState.today,
+				sleep: { ...day.sleep, end: newDate }
+			});
+			if (response.status === 200) {
+				console.log(`Sleep end set successfully : ${newDate}`);
+				setDay(response.data)
+			}
+			else {
+				console.log("Issue ending sleep");
+			}
+		} catch (error) {
+			console.error('Error ending sleep : ', error);
+		}
+	}
 
-
-	function flipFunctionality () {
-		if(!isSettingEOD) {
-			setIsSettingEOD(true)
-			flipFunctionalityTimer.current = setTimeout(() => {
-				setIsSettingEOD(false)
-			}, 5000)
-		} else {
-			clearTimeout(flipFunctionalityTimer.current)
+	const setSleepStart = async (newDate: Date) => {
+		try {
+			const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/day/update`, {
+				_id: currState.today,
+				sleep: { ...day.sleep, start: newDate }
+			});
+			if (response.status === 200) {
+				console.log(`Sleep start set successfully : ${newDate}`);
+				setDay(response.data)
+			}
+			else {
+				console.log("Issue starting sleep");
+			}
+		} catch (error) {
+			console.error('Error starting sleep : ', error);
 		}
 	}
 
@@ -344,7 +397,7 @@ export default function Home() {
 			<div id='day' className='relative min-h-fit my-2 px-8'>
 				<div>
 					{/* Hour slots */}
-					{Array.from({ length: currState.dayLength }).map((_, index) => (
+					{Array.from({ length: Math.ceil(currState.workHrs+currState.sleepHrs) }).map((_, index) => (
 						<div key={index} className='flex flex-row'>
 							<div className='relative flex items-center justify-center border-y border-gray-300 w-72' style={{ height: `${hourHeight}rem` }}>
 								<div className='absolute -top-3 -left-8 px-2'>
@@ -362,7 +415,14 @@ export default function Home() {
 
 				{/* --- NOW --- */}
 				<div className='absolute h-full w-[120%] left-0 top-0'>
-					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now/hourHeight<=currState.dayLength ? now : currState.dayLength*hourHeight}rem` }}></div>
+					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now / hourHeight <= Math.ceil(currState.workHrs+currState.sleepHrs) ? now : Math.ceil(currState.workHrs+currState.sleepHrs) * hourHeight}rem` }}></div>
+				</div>
+
+				{/* sleep indicator  */}
+				<div>
+					<div className='absolute w-full bg-gray-600/20 rounded-lg text-right' style={{ top: `${currState.workHrs * hourHeight}rem`, height: `${currState.sleepHrs * hourHeight}rem` }}>
+						✨
+					</div>
 				</div>
 
 				{/* Chunk render */}
@@ -392,41 +452,63 @@ export default function Home() {
 				<h1 className="text-8xl font-bold mb-6">do-it-now</h1>
 
 				<div className='flex flex-col gap-8'>
-					{/* Pick start of day */}
-					<div className='flex flex-row items-center my-4 justify-end'>
-						<div className='mr-4' onClick={flipFunctionality}>
-							{
-								(!isSettingEOD) ?
-									<p>Start of day :</p> :
-									<div onFocus={() => setIsSettingEOD(true)} tabIndex={0}>
-										<DateTimePicker
-											date={new Date()}
-											setDate={setDayFinish}
-											title='Set EOD'
-											onBtnClick={() => setIsSettingEOD(false)} />
-									</div>
-							}
-						</div>
-						<DateTimePicker
-							date={new Date(day.startOfDay)}
-							setDate={setStartDateTime}
-							title={`${showDateTime(day.startOfDay)}`}
-						/>
-					</div>
-
-					{/* EOD & refresh  */}
 					<div className='flex items-center justify-end gap-4'>
-						<Button variant="secondary"
-							onClick={changeState}>
-							{currState.state === 'awake' && 'Sleep now'}
-							{currState.state === 'asleep' && 'Woke up'}
-							{!currState.state && '⌛'}
-						</Button>
+						{/* Day config  */}
+						<Dialog>
+							<DialogTrigger>
+								<div className='border px-3 py-2 rounded-md hover:bg-gray-400/40'>Config day</div>
+							</DialogTrigger>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>Configure the day</DialogTitle>
+								</DialogHeader>
+								<div className='grid grid-cols-2 gap-3 px-16'>
+									{/* Pick start of day */}
+									<>
+										<p>Start of day :</p>
+										<DateTimePicker
+											date={new Date(day.startOfDay)}
+											setDate={setStartDateTime}
+											title={`${showDateTime(day.startOfDay)}`}
+										/>
+									</>
 
+									{/* Sleep time  */}
+									<>
+										<p>Sleep time :</p>
+										<div className='flex flex-col gap-1'>
+											<div className='flex flex-row'>
+												<p className='pr-2 text-gray-500/40 text-sm items-center'>Start</p>
+												<DateTimePicker
+													date={new Date()}
+													setDate={setSleepStart}
+													title={`${showDateTime(day.sleep.start ? (new Date(day.sleep.start).toISOString()) : (calcTime(day.startOfDay, (currState.workHrs))))}`} />
+											</div>
+											<div className='flex flex-row'>
+												<p className='pr-3 text-gray-500/40 text-sm items-center'>End</p>
+												<DateTimePicker
+													date={new Date()}
+													setDate={setSleepEnd}
+													title={`${showDateTime(day.sleep.end ? (new Date(day.sleep.end).toISOString()) : (calcTime(day.startOfDay, (currState.workHrs+currState.sleepHrs))))}`} />
+											</div>
+										</div>
+									</>
+								</div>
+								<DialogFooter>
+									<Button variant="secondary"
+										onClick={createNewDay}>
+										New day
+									</Button>
+								</DialogFooter>
+							</DialogContent>
+						</Dialog>
+
+						{/* Refresh  */}
 						<Button variant="outline" size="icon" onClick={refresh}>
 							<RefreshIcon />
 						</Button>
 
+						{/* Add chunk  */}
 						<Button variant="outline" size="icon" onClick={createChunk}>
 							<AddIcon />
 						</Button>
@@ -434,7 +516,7 @@ export default function Home() {
 
 					{/* to-do  */}
 					<div>
-						<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday}/>
+						<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} />
 					</div>
 				</div>
 			</div>
