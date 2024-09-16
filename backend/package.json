@@ -9,6 +9,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "seedTags": "node seeds/seedTags.js"
   },
+  "engines": {
+    "node": "20.x"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
