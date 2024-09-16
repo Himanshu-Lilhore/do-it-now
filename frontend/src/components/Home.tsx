@@ -65,7 +65,7 @@ export default function Home() {
 	const fetchTasks = async () => {
 		console.log('fetching tasks ...')
 		try {
-			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`)
+			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`, {withCredentials: true})
 			console.log('Tasks fetched successfully');
 			setTasks(response.data)
 		} catch (err) {

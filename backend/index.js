@@ -22,6 +22,7 @@ app.use(cors({
             origin.startsWith(process.env.FRONTEND_URL)) {
             callback(null, true)
         } else {
+            console.log("Blocked by CORS:", origin);
             callback(new Error('Not allowed by CORS'))
         }
     },
