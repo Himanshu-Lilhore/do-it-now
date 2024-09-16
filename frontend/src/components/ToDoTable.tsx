@@ -13,6 +13,8 @@ import {
 import { TaskEditor } from "./TaskEditor"
 import { useState, useEffect, useRef } from 'react'
 import Axios from 'axios';
+Axios.defaults.withCredentials = true
+
 
 interface Task {
     _id: string,

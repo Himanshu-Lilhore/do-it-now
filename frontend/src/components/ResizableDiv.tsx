@@ -22,6 +22,7 @@ import {
 import EditIcon from '@/assets/EditIcon';
 import { Button } from './ui/button';
 import AddIcon from '@/assets/AddIcon';
+Axios.defaults.withCredentials = true
 
 interface Task {
     _id: string,

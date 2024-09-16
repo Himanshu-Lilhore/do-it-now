@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import { Calendar } from "@/components/ui/calendar"
 import Axios from 'axios'
 import { useToast } from "@/hooks/use-toast"
+Axios.defaults.withCredentials = true
 
 import {
     Sheet,
