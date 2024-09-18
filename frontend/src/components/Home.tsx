@@ -65,7 +65,7 @@ export default function Home() {
 	const fetchTasks = async () => {
 		console.log('fetching tasks ...')
 		try {
-			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`, {withCredentials: true})
+			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`, { withCredentials: true })
 			console.log('Tasks fetched successfully');
 			setTasks(response.data)
 		} catch (err) {
@@ -154,7 +154,7 @@ export default function Home() {
 		const rightNow = Date.now()
 		const dayStart = (new Date(Date.parse(day.startOfDay))).getTime()
 		const diff = rightNow - dayStart
-		const nowBarValue = hourHeight * ((diff) / (1000 * 60 * 60) + (new Date(Date.parse(day.startOfDay)).getMinutes()) / (60)) ;
+		const nowBarValue = hourHeight * ((diff) / (1000 * 60 * 60) + (new Date(Date.parse(day.startOfDay)).getMinutes()) / (60));
 		console.log("--- NOW BAR SET ---")
 		setNow(nowBarValue)
 	}
@@ -302,7 +302,7 @@ export default function Home() {
 
 	const calcStats = async () => {
 		try {
-			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/stat/calcAvg`);
+			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/stat/calcAvg`, { _id: day._id });
 			if (response.status === 200) {
 				console.log("Stats calculated successfully");
 				setCurrState(response.data)
@@ -313,7 +313,7 @@ export default function Home() {
 		} catch (error) {
 			console.error('Error calculating the stats :', error);
 		}
-	} 
+	}
 
 	const createNewDay = async () => {
 		try {
@@ -397,7 +397,7 @@ export default function Home() {
 			<div id='day' className='relative min-h-fit my-2 px-8'>
 				<div>
 					{/* Hour slots */}
-					{Array.from({ length: Math.ceil(currState.workHrs+currState.sleepHrs) }).map((_, index) => (
+					{Array.from({ length: Math.ceil(currState.workHrs + currState.sleepHrs) }).map((_, index) => (
 						<div key={index} className='flex flex-row'>
 							<div className='relative flex items-center justify-center border-y border-gray-300 w-72' style={{ height: `${hourHeight}rem` }}>
 								<div className='absolute -top-3 -left-8 px-2'>
@@ -415,7 +415,7 @@ export default function Home() {
 
 				{/* --- NOW --- */}
 				<div className='absolute h-full w-[120%] left-0 top-0'>
-					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now / hourHeight <= Math.ceil(currState.workHrs+currState.sleepHrs) ? now : Math.ceil(currState.workHrs+currState.sleepHrs) * hourHeight}rem` }}></div>
+					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now / hourHeight <= Math.ceil(currState.workHrs + currState.sleepHrs) ? now : Math.ceil(currState.workHrs + currState.sleepHrs) * hourHeight}rem` }}></div>
 				</div>
 
 				{/* sleep indicator  */}
@@ -448,75 +448,88 @@ export default function Home() {
 			</div>
 
 
-			<div className='fixed top-0 right-0 h-screen pr-4'>
-				<h1 className="text-8xl font-bold mb-6">do-it-now</h1>
 
-				<div className='flex flex-col gap-8'>
-					<div className='flex items-center justify-end gap-4'>
-						{/* Day config  */}
-						<Dialog>
-							<DialogTrigger>
-								<div className='border px-3 py-2 rounded-md hover:bg-gray-400/40'>Config day</div>
-							</DialogTrigger>
-							<DialogContent>
-								<DialogHeader>
-									<DialogTitle>Configure the day</DialogTitle>
-								</DialogHeader>
-								<div className='grid grid-cols-2 gap-3 px-16'>
-									{/* Pick start of day */}
-									<>
-										<p>Start of day :</p>
-										<DateTimePicker
-											date={new Date(day.startOfDay)}
-											setDate={setStartDateTime}
-											title={`${showDateTime(day.startOfDay)}`}
-										/>
-									</>
 
-									{/* Sleep time  */}
-									<>
-										<p>Sleep time :</p>
-										<div className='flex flex-col gap-1'>
-											<div className='flex flex-row'>
-												<p className='pr-2 text-gray-500/40 text-sm items-center'>Start</p>
-												<DateTimePicker
-													date={new Date()}
-													setDate={setSleepStart}
-													title={`${showDateTime(day.sleep.start ? (new Date(day.sleep.start).toISOString()) : (calcTime(day.startOfDay, (currState.workHrs))))}`} />
+			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex 2xl:flex-row flex-col-reverse'>
+				{/* 4am  */}
+				<div className='z-50 p-6 overflow-hidden h-screen'>
+					<iframe className='h-full w-96 rounded-lg'
+						src=
+						"https://himanshu-lilhore.github.io/4am/client/"
+						title="4am" >
+					</iframe>
+				</div>
+
+				<div>
+					<h1 className="text-8xl font-bold mb-6">do-it-now</h1>
+
+					<div className='flex flex-col gap-8'>
+						<div className='flex items-center justify-end gap-4'>
+							{/* Day config  */}
+							<Dialog>
+								<DialogTrigger>
+									<div className='border px-3 py-2 rounded-md hover:bg-gray-400/40'>Config day</div>
+								</DialogTrigger>
+								<DialogContent>
+									<DialogHeader>
+										<DialogTitle>Configure the day</DialogTitle>
+									</DialogHeader>
+									<div className='grid grid-cols-2 gap-3 px-16'>
+										{/* Pick start of day */}
+										<>
+											<p>Start of day :</p>
+											<DateTimePicker
+												date={new Date(day.startOfDay)}
+												setDate={setStartDateTime}
+												title={`${showDateTime(day.startOfDay)}`}
+											/>
+										</>
+
+										{/* Sleep time  */}
+										<>
+											<p>Sleep time :</p>
+											<div className='flex flex-col gap-1'>
+												<div className='flex flex-row'>
+													<p className='pr-2 text-gray-500/40 text-sm items-center'>Start</p>
+													<DateTimePicker
+														date={new Date()}
+														setDate={setSleepStart}
+														title={`${showDateTime(day.sleep.start ? (new Date(day.sleep.start).toISOString()) : (calcTime(day.startOfDay, (currState.workHrs))))}`} />
+												</div>
+												<div className='flex flex-row'>
+													<p className='pr-3 text-gray-500/40 text-sm items-center'>End</p>
+													<DateTimePicker
+														date={new Date()}
+														setDate={setSleepEnd}
+														title={`${showDateTime(day.sleep.end ? (new Date(day.sleep.end).toISOString()) : (calcTime(day.startOfDay, (currState.workHrs + currState.sleepHrs))))}`} />
+												</div>
 											</div>
-											<div className='flex flex-row'>
-												<p className='pr-3 text-gray-500/40 text-sm items-center'>End</p>
-												<DateTimePicker
-													date={new Date()}
-													setDate={setSleepEnd}
-													title={`${showDateTime(day.sleep.end ? (new Date(day.sleep.end).toISOString()) : (calcTime(day.startOfDay, (currState.workHrs+currState.sleepHrs))))}`} />
-											</div>
-										</div>
-									</>
-								</div>
-								<DialogFooter>
-									<Button variant="secondary"
-										onClick={createNewDay}>
-										New day
-									</Button>
-								</DialogFooter>
-							</DialogContent>
-						</Dialog>
+										</>
+									</div>
+									<DialogFooter>
+										<Button variant="secondary"
+											onClick={createNewDay}>
+											New day
+										</Button>
+									</DialogFooter>
+								</DialogContent>
+							</Dialog>
 
-						{/* Refresh  */}
-						<Button variant="outline" size="icon" onClick={refresh}>
-							<RefreshIcon />
-						</Button>
+							{/* Refresh  */}
+							<Button variant="outline" size="icon" onClick={refresh}>
+								<RefreshIcon />
+							</Button>
 
-						{/* Add chunk  */}
-						<Button variant="outline" size="icon" onClick={createChunk}>
-							<AddIcon />
-						</Button>
-					</div>
+							{/* Add chunk  */}
+							<Button variant="outline" size="icon" onClick={createChunk}>
+								<AddIcon />
+							</Button>
+						</div>
 
-					{/* to-do  */}
-					<div>
-						<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} />
+						{/* to-do  */}
+						<div>
+							<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} />
+						</div>
 					</div>
 				</div>
 			</div>

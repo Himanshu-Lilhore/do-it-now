@@ -15,8 +15,7 @@ const calcAvg = async (req, res) => {
             console.log("initiated stat !")
         }
 
-        let currState = await CurrState.findOne({});
-        let thisDay = await Day.find({_id: currState.today})
+        let thisDay = await Day.findOne({_id: req.body._id})
 
         stats.totalDays += 1
 
