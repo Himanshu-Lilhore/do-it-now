@@ -8,7 +8,24 @@ import { Calendar } from "@/components/ui/calendar"
 import Axios from 'axios'
 import { useToast } from "@/hooks/use-toast"
 Axios.defaults.withCredentials = true
-
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table"
 import {
     Sheet,
     SheetClose,
@@ -22,24 +39,41 @@ import {
 import PendingIcon from "@/assets/taskStatus/PendingIcon"
 import DoneIcon from "@/assets/taskStatus/DoneIcon"
 import InProgIcon from "@/assets/taskStatus/InProgIcon"
+import ToDoTable from "./ToDoTable"
+import AddIcon from "@/assets/AddIcon"
 interface Task {
     _id: string,
     title: string,
     description: string,
     deadline: Date,
     status: string,
-    tags: string[]
+    tags: string[],
+    subTasks: string[]
 }
 interface Props {
     task: Task,
     fetchTasks: () => void,
     fetchToday: () => void
+    allTasks: Task[]
 }
+import { Progress } from "@/components/ui/progress"
 
-export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
+
+export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
     const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
     const [myTask, setMyTask] = useState<Task>(task)
+    const [subTasks, setSubTasks] = useState<Task[]>([])
     const { toast } = useToast()
+
+    useEffect(() => {
+        console.log(`task : ${myTask.title}\nsubtasks : `, myTask.subTasks ? myTask.subTasks.length : 0)
+        if(task.subTasks && task.subTasks.length)
+        setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is Task => task !== undefined))
+    }, [task])
+
+    useEffect(() => {
+        setMyTask(task)
+    }, [])
 
 
     function handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
@@ -107,6 +141,23 @@ export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
         }
     }
 
+    const addSubtasks = async (subtaskID: string) => {
+        try {
+            const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+                _id: task._id,
+                subTasks: [...(task.subTasks || []), subtaskID]
+            })
+            if (response.status === 200) {
+                console.log(`Subtask added successfully : ${response.data}`);
+                fetchTasks()
+                fetchToday()
+            }
+        } catch (err) {
+            console.error('Error adding subtask :', err);
+        }
+    }
+
+
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -116,13 +167,33 @@ export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
                     </svg>
                 </Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="overflow-auto">
                 <SheetHeader>
-                    <SheetTitle>Edit Task_</SheetTitle>
+                    <SheetTitle className="font-bold">EDIT TASK</SheetTitle>
                     {/* <SheetDescription>
                       
                     </SheetDescription> */}
                 </SheetHeader>
+                {
+                    (myTask.subTasks && myTask.subTasks.length)
+                    ?
+                    <div className="my-3">
+                        <Progress value={subTasks.filter(task => task.status === 'done').length*100 / subTasks.length} />
+                        <Label htmlFor="subtasks" className="pl-2">
+                            Sub-tasks
+                        </Label>
+                        <div className="flex flex-col border rounded-lg p-3 my-1">
+                            <ToDoTable
+                                tasks={subTasks}
+                                fetchTasks={fetchTasks}
+                                fetchToday={fetchToday}
+                                superTaskID={task._id}
+                                allTasks={allTasks}
+                            />
+                        </div>
+                    </div>
+                    : <></>
+                }
                 <div className="grid gap-6 py-4">
                     {/* title  */}
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -177,9 +248,47 @@ export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
 
                 </div>
                 <SheetFooter className="flex flex-row justify-between w-full">
+                    {/* Add subtasks  */}
+                    <Dialog>
+                        <DialogTrigger>
+                            <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                                Add subtasks
+                            </div>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Tasks</DialogTitle>
+                            </DialogHeader>
+                            <div className='max-h-[24rem] overflow-scroll'>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Title</TableHead>
+                                            <TableHead>Deadline</TableHead>
+                                            <TableHead></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody className="">
+                                        {allTasks.filter(subTask => !task.subTasks?.find(thisStr => thisStr===subTask._id)).map((subTask, index) => {
+                                            if (subTask._id !== task._id)
+                                                return (
+                                                    <TableRow key={subTask._id}>
+                                                        <TableCell className="font-medium min-w-44">{subTask.title}</TableCell>
+                                                        <TableCell className="min-w-24">{subTask.deadline ? `${new Date(subTask.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
+                                                        <TableCell onClick={() => addSubtasks(subTask._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
+                                                    </TableRow>
+                                                )
+                                        })}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </DialogContent>
+                    </Dialog>
+
                     <SheetClose asChild>
                         <Button variant="destructive" onClick={handleDelete}>Delete</Button>
                     </SheetClose>
+
                     <SheetClose asChild>
                         <Button type="submit" onClick={handleSubmit}>Save changes</Button>
                     </SheetClose>

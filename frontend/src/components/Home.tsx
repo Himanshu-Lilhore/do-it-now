@@ -40,7 +40,8 @@ interface Task {
 	description: string,
 	deadline: Date,
 	status: string,
-	tags: string[]
+	tags: string[],
+	subTasks: string[]
 }
 
 
@@ -60,7 +61,8 @@ export default function Home() {
 			description: 'This is a default task description.',
 			deadline: new Date(), // Set to current date/time
 			status: 'pending',
-			tags: ['tag1']
+			tags: ['tag1'],
+			subTasks: []
 		}
 	]);
 
@@ -69,7 +71,7 @@ export default function Home() {
 		console.log('fetching tasks ...')
 		try {
 			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`, { withCredentials: true })
-			console.log('Tasks fetched successfully');
+			console.log(`Tasks fetched successfully (${response.data.length})`);
 			setTasks(response.data)
 		} catch (err) {
 			console.error('Error fetching tasks :', err);
@@ -533,7 +535,7 @@ export default function Home() {
 
 						{/* to-do  */}
 						<div>
-							<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} />
+							<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} allTasks={tasks}/>
 						</div>
 					</div>
 				</div>

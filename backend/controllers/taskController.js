@@ -68,6 +68,7 @@ const getManyTasks = async (req, res) => {
 
         const allTasks = await Task.populate(aggregatedTasks, { path: 'tags' });
 
+
         res.status(200).json(allTasks)
     } catch (err) {
         console.log("Error finding tasks")

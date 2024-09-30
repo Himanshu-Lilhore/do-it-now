@@ -22,13 +22,14 @@ interface Task {
     description: string,
     deadline: Date,
     status: string,
-    tags: string[]
+    tags: string[],
+    subTasks: string[]
 }
 import InProgIcon from "@/assets/taskStatus/InProgIcon"
 import PendingIcon from "@/assets/taskStatus/PendingIcon"
 import DoneIcon from "@/assets/taskStatus/DoneIcon"
 
-export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void }) {
+export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[] }) {
     const [input, setInput] = useState<string>('')
 
     useEffect(() => {
@@ -44,18 +45,39 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Ta
         if (!input) return
         console.log('creating tasks ...')
         try {
-            const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/task/create`, {
+            const response1 = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/task/create`, {
                 title: input,
                 status: 'pending'
             })
-            if (response.status === 200) {
+            if (response1.status === 200) {
                 console.log('Task created successfully');
                 setInput('')
+                if (superTaskID) {
+                    try {
+                        let superTask = allTasks.find(task => task._id.toString() === superTaskID)
+                        console.log("Super Task Before Update: ", superTaskID);
+
+                        if (!superTask) {
+                            console.error("Super Task not found in the list");
+                            return;
+                        }
+                        const response2 = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+                            _id: superTaskID,
+                            subTasks: [...(superTask?.subTasks || []), response1.data._id]
+                        })
+                        if (response2.status === 200) {
+                            console.log('subtask ID added successfully');
+                        }
+                    } catch (err) {
+                        console.error('Error adding subtask ID :', err);
+                    }
+                }
                 fetchTasks()
             }
         } catch (err) {
             console.error('Error creating task :', err);
         }
+
     }
 
     const handleCheckboxChange = async (currStatus: string, id: string) => {
@@ -83,24 +105,24 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Ta
                         <TableRow>
                             <TableHead>Done?</TableHead>
                             <TableHead>Title</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Deadline</TableHead>
-                            <TableHead></TableHead>
+                            {!superTaskID && <TableHead>Status</TableHead>}
+                            {!superTaskID && <TableHead>Deadline</TableHead>}
+                            {!superTaskID && <TableHead></TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody className="">
-                        {tasks && tasks.map((task, index) => {
+                        {tasks.map((task, index) => {
                             return (
                                 <TableRow key={task._id}>
                                     <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
-                                    <TableCell className="font-medium max-w-64 whitespace-nowrap hover:whitespace-normal overflow-hidden text-ellipsis">{task.title}</TableCell>
-                                    <TableCell>
+                                    <TableCell className={`${task.subTasks&&task.subTasks.length?'underline underline-offset-4':''} font-medium max-w-64 whitespace-nowrap overflow-hidden text-ellipsis`}>{task.title}</TableCell>
+                                    {!superTaskID && <TableCell>
                                         <div className="size-5">
                                             {task.status === 'pending' ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)}
                                         </div>
-                                    </TableCell>
-                                    <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
-                                    <TableCell><TaskEditor task={task} fetchTasks={fetchTasks} fetchToday={fetchToday} /></TableCell>
+                                    </TableCell>}
+                                    {!superTaskID && <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>}
+                                    <TableCell><TaskEditor task={task} allTasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} /></TableCell>
                                 </TableRow>
                             )
                         })}
@@ -111,7 +133,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Ta
 
             {/* Input */}
             <div className='flex flex-row gap-4 sticky bottom-0 right-0 p-4 bg-background'>
-                <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="what to do ??" />
+                <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="Add more..." />
                 <Button type="submit" onClick={createTask}>Create</Button>
             </div>
         </div>

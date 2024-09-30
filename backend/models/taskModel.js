@@ -19,6 +19,10 @@ const TaskSchema = new mongoose.Schema({
     tags: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Tag'
+    }],
+    subTasks: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task'
     }]
 }, {timestamps: true});
 
