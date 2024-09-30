@@ -16,6 +16,7 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog"
 import { toast } from '@/hooks/use-toast';
+import CreateChunk from './CreateChunk';
 
 Axios.defaults.withCredentials = true
 interface DayState {
@@ -26,6 +27,7 @@ interface DayState {
 	chunksRemaining: number | null;
 }
 interface Chunk {
+	title: string,
 	_id: string;
 	startTime: string;
 	duration: number;
@@ -50,6 +52,7 @@ export default function Home() {
 	const hourHeight = 4  // rem
 	let myTimer = setInterval(() => { return }, 100000000)
 	let startHr = new Date(Date.parse(day.startOfDay)).getHours()
+	const buttonRef = useRef<HTMLButtonElement>(null)
 	const [tasks, setTasks] = useState<Task[]>([
 		{
 			_id: 'default',
@@ -190,6 +193,9 @@ export default function Home() {
 
 
 	const refresh = async () => {
+		if (buttonRef.current) {
+			buttonRef.current.classList.toggle('rotate-180'); // Toggle the rotate class
+		}
 		fetchState()
 		fetchTasks()
 		clearInterval(myTimer)
@@ -197,9 +203,10 @@ export default function Home() {
 	}
 
 
-	const createChunk = async () => {
+	const createChunk = async (title: string) => {
 		try {
 			const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/chunk/create`, {
+				title: title,
 				startTime: Date.now(),
 				duration: 2
 			});
@@ -516,14 +523,12 @@ export default function Home() {
 							</Dialog>
 
 							{/* Refresh  */}
-							<Button variant="outline" size="icon" onClick={refresh}>
+							<Button ref={buttonRef} variant="outline" size="icon" onClick={refresh} className='transition-all duration-200'>
 								<RefreshIcon />
 							</Button>
 
 							{/* Add chunk  */}
-							<Button variant="outline" size="icon" onClick={createChunk}>
-								<AddIcon />
-							</Button>
+							<CreateChunk createChunk={createChunk} />
 						</div>
 
 						{/* to-do  */}

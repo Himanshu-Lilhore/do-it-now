@@ -35,6 +35,7 @@ interface Task {
 
 interface ResizableDivProps {
     thisChunk: {
+        title: string,
         _id: string;
         startTime: string;
         duration: number;
@@ -228,7 +229,7 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
     return (
         <div id='magicdivparent'>
             <div id='magicdiv'
-                className={`${height > 9 ? 'h-[8rem] w-24' : `${height>5?`h-[${Math.floor(height)}rem] w-36`:'h-[2.5rem] w-56'} `} absolute z-10 -right-6 border-r-4 border-transparent hover:border-red-900 rounded-lg items-center`}
+                className={`${height > 9 ? 'h-[8rem] w-24' : `${height > 5 ? `h-[${Math.floor(height)}rem] w-36` : 'h-[2.5rem] w-56'} `} absolute z-10 -right-6 border-r-4 border-transparent hover:border-red-900 rounded-lg items-center`}
                 style={{
                     top: `${top}rem`,
                 }}>
@@ -322,8 +323,13 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
                 }}
                 onMouseDown={handleDragMouseDown}  // Initiate dragging
             >
+                {/* chunk title  */}
+                {thisChunk.title &&
+                    <div className='text-xs px-1 tracking-widest font-bold'>
+                        {thisChunk.title.toUpperCase()}
+                    </div>}
                 {/* {thisChunk._id} */}
-                <div className={`${height > 9 ? 'pr-12' : `${height>5?'pr-20':'pr-28'}`} py-3 pl-3 flex flex-col gap-3 text-sm`}>
+                <div className={`${height > 9 ? 'pr-12' : `${height > 5 ? 'pr-20' : 'pr-28'}`} py-3 pl-3 flex flex-col gap-3 text-sm`}>
                     {thisChunk.tasks.map((task, idx) => (
                         <div className={`bg-black p-2 rounded-md whitespace-nowrap overflow-hidden text-ellipsis ${task.status === 'done' && 'line-through'}`} key={idx}>{task.title}</div>
                     ))}
