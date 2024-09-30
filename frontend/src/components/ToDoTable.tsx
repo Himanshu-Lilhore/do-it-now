@@ -122,7 +122,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                         </div>
                                     </TableCell>}
                                     {!superTaskID && <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>}
-                                    <TableCell><TaskEditor task={task} allTasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} /></TableCell>
+                                    <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} /></TableCell>
                                 </TableRow>
                             )
                         })}

@@ -175,7 +175,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
                     </SheetDescription> */}
                 </SheetHeader>
                 {
-                    (myTask.subTasks && myTask.subTasks.length)
+                    (subTasks && subTasks.length)
                     ?
                     <div className="my-3">
                         <Progress value={subTasks.filter(task => task.status === 'done').length*100 / subTasks.length} />
