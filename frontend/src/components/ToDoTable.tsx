@@ -24,8 +24,9 @@ interface Task {
     status: string,
     tags: string[]
 }
-
-
+import InProgIcon from "@/assets/taskStatus/InProgIcon"
+import PendingIcon from "@/assets/taskStatus/PendingIcon"
+import DoneIcon from "@/assets/taskStatus/DoneIcon"
 
 export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void }) {
     const [input, setInput] = useState<string>('')
@@ -93,7 +94,11 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Ta
                                 <TableRow key={task._id}>
                                     <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
                                     <TableCell className="font-medium max-w-64 whitespace-nowrap hover:whitespace-normal overflow-hidden text-ellipsis">{task.title}</TableCell>
-                                    <TableCell>{task.status}</TableCell>
+                                    <TableCell>
+                                        <div className="size-5">
+                                            {task.status === 'pending' ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
                                     <TableCell><TaskEditor task={task} fetchTasks={fetchTasks} fetchToday={fetchToday} /></TableCell>
                                 </TableRow>
@@ -106,7 +111,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday }: { tasks: Ta
 
             {/* Input */}
             <div className='flex flex-row gap-4 sticky bottom-0 right-0 p-4 bg-background'>
-                <Input onChange={handleInputChange} value={input} type="search" placeholder="what to do ??" />
+                <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="what to do ??" />
                 <Button type="submit" onClick={createTask}>Create</Button>
             </div>
         </div>

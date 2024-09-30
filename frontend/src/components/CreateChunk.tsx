@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
+    DialogClose,
     DialogFooter,
     DialogHeader,
     DialogTitle,
@@ -11,14 +11,22 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import AddIcon from '@/assets/AddIcon';
-import {useState} from 'react'
+import { useState, useRef } from 'react'
+import { toast } from '@/hooks/use-toast';
 
-
-export default function CreateChunk({createChunk} : {createChunk : (val: string) => void}) {
+export default function CreateChunk({ createChunk }: { createChunk: (val: string) => void }) {
     const [title, setTitle] = useState("")
+    const submitButtonRef = useRef<HTMLButtonElement>(null)
 
-    function handleSubmit () {
-        createChunk(title)
+    function handleSubmit() {
+        if (!(title.trim())) {
+            toast({
+                description: "Untitled chunk won't be generated !"
+            })
+            return
+        }
+        createChunk(title.trim())
+        setTitle('')
     }
 
     return (
@@ -39,14 +47,18 @@ export default function CreateChunk({createChunk} : {createChunk : (val: string)
                         </Label>
                         <Input
                             id="title"
-                            defaultValue=""
+                            placeholder="what's up..?"
+                            value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && submitButtonRef.current?.click()}
                             className="col-span-3"
                         />
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button type="submit" onClick={handleSubmit}>Submit</Button>
+                    <DialogClose asChild>
+                        <Button type="submit" onClick={handleSubmit} ref={submitButtonRef}>Submit</Button>
+                    </DialogClose>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

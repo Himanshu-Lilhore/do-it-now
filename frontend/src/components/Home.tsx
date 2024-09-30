@@ -468,7 +468,7 @@ export default function Home() {
 				</div>
 
 				<div>
-					<h1 className="text-8xl font-bold mb-6">do-it-now</h1>
+					<h1 className="text-8xl font-bold mb-6 text-right">do-it-now</h1>
 
 					<div className='flex flex-col gap-8'>
 						<div className='flex items-center justify-end gap-4'>

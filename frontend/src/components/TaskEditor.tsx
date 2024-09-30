@@ -19,6 +19,9 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet"
+import PendingIcon from "@/assets/taskStatus/PendingIcon"
+import DoneIcon from "@/assets/taskStatus/DoneIcon"
+import InProgIcon from "@/assets/taskStatus/InProgIcon"
 interface Task {
     _id: string,
     title: string,
@@ -30,7 +33,7 @@ interface Task {
 interface Props {
     task: Task,
     fetchTasks: () => void,
-    fetchToday: () => void 
+    fetchToday: () => void
 }
 
 export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
@@ -65,10 +68,14 @@ export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
     const handleSubmit = async () => {
         console.log('Updating task ...')
         try {
-            const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
-                ...myTask,
-                deadline: calDate
-            })
+            const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`,
+                task.deadline ?
+                    {
+                        ...myTask,
+                        deadline: calDate
+                    } :
+                    { ...myTask }
+            )
             if (response.status === 200) {
                 console.log(`Task updated successfully : ${response.data.title}`);
                 fetchTasks()
@@ -130,7 +137,12 @@ export function TaskEditor({ task, fetchTasks, fetchToday }: Props) {
                         <Label htmlFor="status" className="text-right">
                             Status
                         </Label>
-                        <StatusSelect title={myTask.status} onValueChange={handleStatus} />
+                        <div className="relative flex w-fit items-center">
+                            <StatusSelect title={myTask.status} onValueChange={handleStatus} />
+                            <div className="size-5 items-center mx-2">
+                                {myTask.status === 'pending' ? <PendingIcon /> : (myTask.status === 'done' ? <DoneIcon /> : <InProgIcon />)}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Deadline  */}
