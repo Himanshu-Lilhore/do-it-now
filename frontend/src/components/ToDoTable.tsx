@@ -25,11 +25,17 @@ interface Task {
     tags: string[],
     subTasks: string[]
 }
+interface Tag {
+	name: string,
+	category: string,
+	color: string,
+	_id: string
+}
 import InProgIcon from "@/assets/taskStatus/InProgIcon"
 import PendingIcon from "@/assets/taskStatus/PendingIcon"
 import DoneIcon from "@/assets/taskStatus/DoneIcon"
 
-export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[] }) {
+export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags:Tag[] }) {
     const [input, setInput] = useState<string>('')
 
     useEffect(() => {
@@ -122,7 +128,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                         </div>
                                     </TableCell>}
                                     {!superTaskID && <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>}
-                                    <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} /></TableCell>
+                                    <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} /></TableCell>
                                 </TableRow>
                             )
                         })}

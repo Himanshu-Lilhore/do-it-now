@@ -53,13 +53,22 @@ interface Task {
 interface Props {
     task: Task,
     fetchTasks: () => void,
-    fetchToday: () => void
-    allTasks: Task[]
+    fetchToday: () => void,
+    allTasks: Task[],
+    tags: Tag[]
+}
+interface Tag {
+    name: string,
+    category: string,
+    color: string,
+    _id: string
 }
 import { Progress } from "@/components/ui/progress"
+import TagSelect from "./ui/TagSelect"
+import CloseIcon from "@/assets/CloseIcon"
 
 
-export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
+export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Props) {
     const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
     const [myTask, setMyTask] = useState<Task>(task)
     const [subTasks, setSubTasks] = useState<Task[]>([])
@@ -67,8 +76,8 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
 
     useEffect(() => {
         console.log(`task : ${myTask.title}\nsubtasks : `, myTask.subTasks ? myTask.subTasks.length : 0)
-        if(task.subTasks && task.subTasks.length)
-        setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is Task => task !== undefined))
+        if (task.subTasks && task.subTasks.length)
+            setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is Task => task !== undefined))
     }, [task])
 
     useEffect(() => {
@@ -158,6 +167,23 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
     }
 
 
+    const addTag = async (subtaskID: string) => {
+        try {
+            // const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+            //     _id: task._id,
+            //     subTasks: [...(task.subTasks || []), subtaskID]
+            // })
+            // if (response.status === 200) {
+            //     console.log(`Subtask added successfully : ${response.data}`);
+            //     fetchTasks()
+            //     fetchToday()
+            // }
+        } catch (err) {
+            console.error('Error adding subtask :', err);
+        }
+    }
+
+
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -176,23 +202,25 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
                 </SheetHeader>
                 {
                     (subTasks && subTasks.length)
-                    ?
-                    <div className="my-3">
-                        <Progress value={subTasks.filter(task => task.status === 'done').length*100 / subTasks.length} />
-                        <Label htmlFor="subtasks" className="pl-2">
-                            Sub-tasks
-                        </Label>
-                        <div className="flex flex-col border rounded-lg p-3 my-1">
-                            <ToDoTable
-                                tasks={subTasks}
-                                fetchTasks={fetchTasks}
-                                fetchToday={fetchToday}
-                                superTaskID={task._id}
-                                allTasks={allTasks}
-                            />
+                        ?
+                        /* Subtasks  */
+                        <div className="my-3">
+                            <Progress value={subTasks.filter(task => task.status === 'done').length * 100 / subTasks.length} />
+                            <Label htmlFor="subtasks" className="pl-2">
+                                Sub-tasks
+                            </Label>
+                            <div className="flex flex-col border rounded-lg p-3 my-1">
+                                <ToDoTable
+                                    tasks={subTasks}
+                                    fetchTasks={fetchTasks}
+                                    fetchToday={fetchToday}
+                                    superTaskID={task._id}
+                                    allTasks={allTasks}
+                                    tags={tags}
+                                />
+                            </div>
                         </div>
-                    </div>
-                    : <></>
+                        : <></>
                 }
                 <div className="grid gap-6 py-4">
                     {/* title  */}
@@ -243,11 +271,35 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
                         <Label htmlFor="tags" className="text-right">
                             Tags
                         </Label>
-                        <div className="col-span-3"></div>
+                        <div className="col-span-3 flex flex-row gap-3 flex-wrap">
+                            <div className="flex flex-row gap-2 flex-wrap">
+                                {myTask.tags
+                                    .map(thisStr => tags.find(tagg => tagg._id.toString() === thisStr.toString()))
+                                    .filter(tag => tag)
+                                    .map((tag,index) => (
+                                        <div
+                                            key={tag?._id || index}
+                                            className="text-black font-medium py-1 pl-4 pr-2 border rounded-full flex flex-row gap-2 items-center"
+                                            style={{ backgroundColor: tag?.color }}
+                                        >
+                                            <div className="text-black">
+                                                {((str: string) => str.charAt(0).toUpperCase() + str.slice(1))(tag?.name || "")}
+                                            </div>
+                                            <div onClick={() => setMyTask(prev => ({ ...prev, tags: prev.tags.filter(id => id !== tag?._id) }))}>
+                                                <CloseIcon />
+                                            </div>
+                                        </div>
+                                    ))}
+                            </div>
+
+                            {myTask.tags.length < tags.length &&
+                                <TagSelect myTask={myTask} setMyTask={setMyTask} title='Add tag' tags={tags} />
+                            }
+                        </div>
                     </div>
 
                 </div>
-                <SheetFooter className="flex flex-row justify-between w-full">
+                <SheetFooter className="flex flex-row justify-between w-full pt-4">
                     {/* Add subtasks  */}
                     <Dialog>
                         <DialogTrigger>
@@ -269,7 +321,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks }: Props) {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody className="">
-                                        {allTasks.filter(subTask => !task.subTasks?.find(thisStr => thisStr===subTask._id)).map((subTask, index) => {
+                                        {allTasks.filter(subTask => !task.subTasks?.find(thisStr => thisStr === subTask._id)).map((subTask, index) => {
                                             if (subTask._id !== task._id)
                                                 return (
                                                     <TableRow key={subTask._id}>

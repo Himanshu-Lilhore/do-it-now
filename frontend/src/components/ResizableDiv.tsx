@@ -32,7 +32,6 @@ interface Task {
     status: string,
     tags: string[]
 }
-
 interface ResizableDivProps {
     thisChunk: {
         title: string,
@@ -46,18 +45,17 @@ interface ResizableDivProps {
     deleteChunk: (chunkId: string) => void;
     fetchToday: () => void;
     tasks: Task[];
-    fetchTasks: () => void
+    fetchTasks: () => void;
+    tags: Tag[]
+}
+interface Tag {
+    name: string,
+    category: string,
+    color: string,
+    _id: string
 }
 
-const ResizableDiv: React.FC<ResizableDivProps> = ({
-    thisChunk,
-    hourHeight,
-    getChunkDepth,
-    deleteChunk,
-    fetchToday,
-    tasks,
-    fetchTasks,
-}) => {
+export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, deleteChunk, fetchToday, tasks, fetchTasks, tags }: ResizableDivProps) {
     const [height, setHeight] = useState<number>(thisChunk.duration * hourHeight);
     const [top, setTop] = useState<number>(getChunkDepth(thisChunk.startTime));
     const [prevTop, setPrevTop] = useState<number>(getChunkDepth(thisChunk.startTime))
@@ -77,6 +75,14 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
         topRef.current = top;
     }, [top]);
 
+
+    // Color - theme
+    const applyOpacityToHex = (hex: string, opacity: number) => {
+        const alpha = Math.round(opacity * 255).toString(16).padStart(2, '0'); // Convert opacity to 2-digit hex
+        return `${hex}${alpha}`;
+    };
+    const backgroundColor = applyOpacityToHex(tags[0].color, 0.1);
+    const borderColor = tags[0].color;
 
 
     // Dragging handlers
@@ -320,10 +326,12 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
             {/* tasks  */}
             <div
                 ref={resizableRef}
-                className='absolute overflow-auto left-6 border-4 border-sky-900 rounded-lg w-full bg-sky-500/10 cursor-move'
+                className='absolute overflow-auto left-6 border-4 rounded-lg w-full cursor-move'
                 style={{
                     top: `${top}rem`,
                     height: `${height}rem`,
+                    backgroundColor: backgroundColor,
+                    borderColor: borderColor,
                 }}
                 onMouseDown={handleDragMouseDown}  // Initiate dragging
             >
@@ -348,4 +356,3 @@ const ResizableDiv: React.FC<ResizableDivProps> = ({
     );
 };
 
-export default ResizableDiv;

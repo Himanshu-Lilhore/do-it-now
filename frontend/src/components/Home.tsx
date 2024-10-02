@@ -43,10 +43,16 @@ interface Task {
 	tags: string[],
 	subTasks: string[]
 }
-
+interface Tag {
+	name: string,
+	category: string,
+	color: string,
+	_id: string
+}
 
 export default function Home() {
 	const ref = useRef<HTMLDivElement>(null);
+	const [tags, setTags] = useState<Tag[]>([])
 	const [day, setDay] = useState<DayState>({ startOfDay: '01 Jan 1970 00:00:00 GMT', chunks: [], sleep: { start: null, end: null }, chunksRemaining: null })
 	const [currState, setCurrState] = useState({ state: null, today: null, workHrs: 16, sleepHrs: 8, yesterday: null })
 	const [now, setNow] = useState<number>(0)   // hourHeight * number of wake hrs passed
@@ -66,6 +72,16 @@ export default function Home() {
 		}
 	]);
 
+	const fetchTags = async () => {
+		console.log('fetching tags ...')
+		try {
+			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/tag/read`, { withCredentials: true })
+			console.log(`Tags fetched successfully (${response.data})`);
+			setTags(response.data)
+		} catch (err) {
+			console.error('Error fetching tags :', err);
+		}
+	}
 
 	const fetchTasks = async () => {
 		console.log('fetching tasks ...')
@@ -103,6 +119,7 @@ export default function Home() {
 	useEffect(() => {
 		fetchState()
 		scrollToCurr()
+		fetchTags()
 	}, [])
 
 	const fetchToday = async () => {
@@ -448,6 +465,7 @@ export default function Home() {
 										fetchToday={fetchToday}
 										tasks={tasks}
 										fetchTasks={fetchTasks}
+										tags={tags}
 									/>
 								}
 							</div>
@@ -535,7 +553,7 @@ export default function Home() {
 
 						{/* to-do  */}
 						<div>
-							<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} allTasks={tasks}/>
+							<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} allTasks={tasks} tags={tags} />
 						</div>
 					</div>
 				</div>

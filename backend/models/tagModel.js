@@ -10,6 +10,10 @@ const TagSchema = new mongoose.Schema({
         type: String,
         enum: ['productive', 'semi-productive', 'unproductive'],
         required: true
+    },
+    color: {
+        type: String,
+        default: '#646464'
     }
 }, {timestamps: true});
 

@@ -10,6 +10,7 @@ const statRouter = require('./routes/statRouter')
 const taskRouter = require('./routes/taskRouter')
 const chunkRouter = require('./routes/chunkRouter')
 const dayRouter = require('./routes/dayRouter')
+const tagRouter = require('./routes/tagRouter')
 
 const app = express();
 connectDB()
@@ -35,6 +36,7 @@ app.use('/task', taskRouter)
 app.use('/chunk', chunkRouter)
 app.use('/day', dayRouter)
 app.use('/stat', statRouter)
+app.use('/tag', tagRouter)
 
 
 app.listen(PORT, () => {

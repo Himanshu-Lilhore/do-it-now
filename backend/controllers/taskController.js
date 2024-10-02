@@ -30,7 +30,7 @@ const updateTask = async (req, res) => {
 
 const getTask = async (req, res) => {
     try {
-        const myTask = await Task.findOne({...req.body}).populate('tags')
+        const myTask = await Task.findOne({...req.body})
         console.log("Task read !!")
         res.status(200).json(myTask)
     } catch (err) {
@@ -66,10 +66,10 @@ const getManyTasks = async (req, res) => {
             return res.status(404).json({ message: "No tasks found" });
         }
 
-        const allTasks = await Task.populate(aggregatedTasks, { path: 'tags' });
+        // const allTasks = await Task.populate(aggregatedTasks, { path: 'tags' });
 
 
-        res.status(200).json(allTasks)
+        res.status(200).json(aggregatedTasks)
     } catch (err) {
         console.log("Error finding tasks")
         res.status(400).json({ error: err.message })
