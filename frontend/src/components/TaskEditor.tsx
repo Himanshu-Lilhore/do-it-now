@@ -66,6 +66,7 @@ interface Tag {
 import { Progress } from "@/components/ui/progress"
 import TagSelect from "./ui/TagSelect"
 import CloseIcon from "@/assets/CloseIcon"
+import { Checkbox } from "@/components/ui/checkbox"
 
 
 export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Props) {
@@ -75,6 +76,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
     const [thumbnailURL, setThumbnailURL] = useState()
     const [vidURL, setVidURL] = useState<string>()
     const [channel, setChannel] = useState<string>()
+    const [del, setDel] = useState(false)
     const { toast } = useToast()
 
     useEffect(() => {
@@ -131,6 +133,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
     }
 
     const handleDelete = async () => {
+        if (!del) return
         console.log('Deleting task ...')
         try {
             const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/task/delete`, {
@@ -284,6 +287,46 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         </div>
                     </div>
 
+                    {/* Add subtasks  */}
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <div></div>
+                        <Dialog>
+                            <DialogTrigger>
+                                <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                                    Add subtasks
+                                </div>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Tasks</DialogTitle>
+                                </DialogHeader>
+                                <div className='max-h-[24rem] overflow-scroll'>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Title</TableHead>
+                                                <TableHead>Deadline</TableHead>
+                                                <TableHead></TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody className="">
+                                            {allTasks.filter(subTask => !task.subTasks?.find(thisStr => thisStr === subTask._id)).map((subTask, index) => {
+                                                if (subTask._id !== task._id)
+                                                    return (
+                                                        <TableRow key={subTask._id}>
+                                                            <TableCell className="font-medium min-w-44">{subTask.title}</TableCell>
+                                                            <TableCell className="min-w-24">{subTask.deadline ? `${new Date(subTask.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
+                                                            <TableCell onClick={() => addSubtasks(subTask._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
+                                                        </TableRow>
+                                                    )
+                                            })}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
                     {/* Deadline  */}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="deadline" className="text-right">
@@ -296,7 +339,6 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                             className="col-span-3 rounded-md border"
                         />
                     </div>
-
 
                     {/* Description  */}
                     <div className="grid grid-cols-4 items-center gap-4">
@@ -338,48 +380,19 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         </div>
                     </div>
 
-                </div>
-                <SheetFooter className="flex flex-row justify-between w-full pt-4">
-                    {/* Add subtasks  */}
-                    <Dialog>
-                        <DialogTrigger>
-                            <div className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-                                Add subtasks
-                            </div>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Tasks</DialogTitle>
-                            </DialogHeader>
-                            <div className='max-h-[24rem] overflow-scroll'>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Title</TableHead>
-                                            <TableHead>Deadline</TableHead>
-                                            <TableHead></TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody className="">
-                                        {allTasks.filter(subTask => !task.subTasks?.find(thisStr => thisStr === subTask._id)).map((subTask, index) => {
-                                            if (subTask._id !== task._id)
-                                                return (
-                                                    <TableRow key={subTask._id}>
-                                                        <TableCell className="font-medium min-w-44">{subTask.title}</TableCell>
-                                                        <TableCell className="min-w-24">{subTask.deadline ? `${new Date(subTask.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
-                                                        <TableCell onClick={() => addSubtasks(subTask._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
-                                                    </TableRow>
-                                                )
-                                        })}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </DialogContent>
-                    </Dialog>
 
-                    <SheetClose asChild>
-                        <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-                    </SheetClose>
+                </div>
+                <SheetFooter className="flex flex-col w-full pt-8">
+                    <div className="flex flex-row items-center gap-10">
+                        <div className="flex flex-row items-center gap-2">
+                            <Label>Delete?</Label>
+                            <Checkbox
+                                checked={del}
+                                onCheckedChange={() => setDel(prev => !prev)}
+                            />
+                        </div>
+                        <Button variant="destructive" className="w-5/6" onClick={handleDelete}>Delete</Button>
+                    </div>
 
                     <SheetClose asChild>
                         <Button type="submit" onClick={handleSubmit}>Save changes</Button>
