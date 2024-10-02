@@ -314,7 +314,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                                 if (subTask._id !== task._id)
                                                     return (
                                                         <TableRow key={subTask._id}>
-                                                            <TableCell className="font-medium min-w-44">{subTask.title}</TableCell>
+                                                            <TableCell className="font-medium min-w-44">{((subTask.tags.length && (tags.find(tag => tag._id === subTask.tags[0])?.name) === 'youtube')) ? '▶ ': ''}{subTask.title}</TableCell>
                                                             <TableCell className="min-w-24">{subTask.deadline ? `${new Date(subTask.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
                                                             <TableCell onClick={() => addSubtasks(subTask._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
                                                         </TableRow>

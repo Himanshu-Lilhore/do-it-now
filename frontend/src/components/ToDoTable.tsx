@@ -110,7 +110,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
     return (
         <div className="flex flex-col gap-4">
             {/* Table */}
-            <div className="max-h-[29rem] overflow-scroll">
+            <div className="max-h-[33rem] overflow-scroll">
                 <Table>
                     <TableHeader>
                         <TableRow>

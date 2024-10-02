@@ -305,7 +305,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                                                                 if (task.status !== 'done') {
                                                                     return (
                                                                         <TableRow key={task._id}>
-                                                                            <TableCell className="font-medium min-w-44">{task.title}</TableCell>
+                                                                            <TableCell className="font-medium min-w-44">{((task.tags.length && (tags.find(tag => tag._id === task.tags[0])?.name) === 'youtube')) ? '▶ ': ''}{task.title}</TableCell>
                                                                             <TableCell className="min-w-24">{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
                                                                             <TableCell onClick={() => addTask(thisChunk._id, task._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
                                                                         </TableRow>
@@ -334,7 +334,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
             {/* tasks  */}
             <div
                 ref={resizableRef}
-                className='absolute overflow-auto left-6 border-4 rounded-lg w-full cursor-move'
+                className='absolute backdrop-blur-sm overflow-auto left-6 border-4 rounded-lg w-full cursor-move'
                 style={{
                     top: `${top}rem`,
                     height: `${height}rem`,
@@ -351,7 +351,9 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                 {/* {thisChunk._id} */}
                 <div className={`${height > 9 ? 'pr-12' : `${height > 5 ? 'pr-20' : 'pr-28'}`} py-3 pl-3 flex flex-col gap-3 text-sm`}>
                     {thisChunk.tasks.map((task, idx) => (
-                        <div className={`bg-black p-2 rounded-md whitespace-nowrap overflow-hidden text-ellipsis ${task.status === 'done' && 'line-through'}`} key={idx}>{task.title}</div>
+                        <div className={`bg-stone-950/70 border p-2 rounded-md whitespace-nowrap overflow-hidden text-ellipsis ${task.status === 'done' && 'line-through'}`} key={idx}>
+                            {task.title}
+                            </div>
                     ))}
                 </div>
 
