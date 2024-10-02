@@ -28,8 +28,9 @@ const createTask = async (req, res) => {
                 const videoDuration = convertDurationToReadableFormat(videoDetails.contentDetails.duration);
                 const uploadDate = videoDetails.snippet.publishedAt;
                 const channel = videoDetails.snippet.channelTitle
+                const responseObj = JSON.stringify(response.data)
                 title = videoTitle;
-                description = `Channel : ${channel}\nDuration : ${videoDuration}\nUpload Date : ${new Date(uploadDate).toLocaleDateString()}\nURL : ${url}`;
+                description = `Channel : ${channel}\nDuration : ${videoDuration}\nUpload Date : ${new Date(uploadDate).toLocaleDateString()}\nURL : ${url}\nResponseObj : ${responseObj}`;
                 
                 const youtubeTag = await Tag.findOne({ name: 'youtube' });
                 if (youtubeTag) {

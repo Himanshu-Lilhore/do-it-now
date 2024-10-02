@@ -72,6 +72,9 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
     const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
     const [myTask, setMyTask] = useState<Task>(task)
     const [subTasks, setSubTasks] = useState<Task[]>([])
+    const [thumbnailURL, setThumbnailURL] = useState()
+    const [vidURL, setVidURL] = useState<string>()
+    const [channel, setChannel] = useState<string>()
     const { toast } = useToast()
 
     useEffect(() => {
@@ -81,6 +84,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
 
     useEffect(() => {
         setMyTask(task)
+        getVidDetails()
     }, [])
 
 
@@ -97,8 +101,6 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
             status: val
         }));
     }
-
-
 
     function handleDescription(e: React.ChangeEvent<HTMLTextAreaElement>) {
         setMyTask(prev => ({
@@ -165,7 +167,49 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
         }
     }
 
+    function getVidDetails() {
+        if (!(task.tags.length && (tags.find(tag => tag._id === task.tags[0])?.name) === 'youtube')) return
+        let thumbnailUrl = null;
+        let videoTitle = null;
+        let channelName = '';
+        let duration = null;
+        let uploadDate = null;
+        let url = '';
 
+        try {
+            const lines = task.description.split('\n');
+
+            lines.forEach(line => {
+                if (line.startsWith('Channel : ')) {
+                    channelName = line.replace('Channel : ', '');
+                } else if (line.startsWith('Duration : ')) {
+                    duration = line.replace('Duration : ', '');
+                } else if (line.startsWith('Upload Date : ')) {
+                    uploadDate = line.replace('Upload Date : ', '');
+                } else if (line.startsWith('URL : ')) {
+                    url = line.replace('URL : ', '');
+                } else if (line.startsWith('ResponseObj : ')) {
+                    const responseObjString = line.replace('ResponseObj : ', '');
+
+                    try {
+                        const responseObj = JSON.parse(responseObjString);
+
+                        videoTitle = responseObj.items[0].snippet.title;
+                        thumbnailUrl = responseObj.items[0].snippet.thumbnails.high.url ||
+                            responseObj.items[0].snippet.thumbnails.default.url;
+
+                        setVidURL(url);
+                        setChannel(channelName)
+                        setThumbnailURL(thumbnailUrl);
+                    } catch (error) {
+                        console.error('Failed to parse ResponseObj:', error);
+                    }
+                }
+            });
+        } catch (err) {
+            console.error('Failed to parse task description', err);
+        }
+    }
 
     return (
         <Sheet>
@@ -206,6 +250,19 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         : <></>
                 }
                 <div className="grid gap-6 py-4">
+
+                    {/* thumbnail  */}
+                    {((task.tags.length && (tags.find(tag => tag._id === task.tags[0])?.name) === 'youtube')) &&
+                        <div className="flex w-full justify-center  px-3">
+                            <div className="relative w-fit overflow-hidden rounded-lg hover:saturate-200 hover:scale-105 transition-all duration-300">
+                                <a href={vidURL} target='_blank'>
+                                    <img src={thumbnailURL} alt={`thumbnail`} />
+                                </a>
+                                <div className="text-black w-full font-bold absolute z-10 bottom-0 opacity-50 bg-gray-500/80 text-center">{channel}</div>
+                            </div>
+                        </div>
+                    }
+
                     {/* title  */}
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="title" className="text-right">
@@ -259,7 +316,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                 {myTask.tags
                                     .map(thisStr => tags.find(tagg => tagg._id.toString() === thisStr.toString()))
                                     .filter(tag => tag)
-                                    .map((tag,index) => (
+                                    .map((tag, index) => (
                                         <div
                                             key={tag?._id || index}
                                             className="text-black font-medium py-1 pl-4 pr-2 border rounded-full flex flex-row gap-2 items-center"
