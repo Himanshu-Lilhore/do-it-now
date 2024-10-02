@@ -7,7 +7,8 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "seedTags": "node seeds/seedTags.js"
+    "seedTags": "node seeds/seedTags.js",
+    "cleanup": "node seeds/cleanup.js"
   },
   "engines": {
     "node": "20.x"

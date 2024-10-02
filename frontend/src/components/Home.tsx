@@ -76,7 +76,6 @@ export default function Home() {
 		console.log('fetching tags ...')
 		try {
 			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/tag/read`, { withCredentials: true })
-			console.log(`Tags fetched successfully (${response.data})`);
 			setTags(response.data)
 		} catch (err) {
 			console.error('Error fetching tags :', err);
@@ -156,10 +155,10 @@ export default function Home() {
 
 		fetchTasks()
 
-		console.log(`Day updated - \n
-			startOfDay : ${day.startOfDay} \n
-			sleep : ${day.sleep.start} to ${day.sleep.end} \n
-			chunksRemaining : ${day.chunksRemaining} \n
+		console.log(`Day updated -
+			startOfDay : ${day.startOfDay}
+			sleep : ${day.sleep.start} to ${day.sleep.end}
+			chunksRemaining : ${day.chunksRemaining}
 			chunks : ${day.chunks.map(val => {
 			return `start - ${val.startTime}, dur - ${val.duration}, rating - ${val.rating}, tasks - ${val.tasks}`
 		})}`)

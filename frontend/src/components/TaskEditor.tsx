@@ -75,7 +75,6 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
     const { toast } = useToast()
 
     useEffect(() => {
-        console.log(`task : ${myTask.title}\nsubtasks : `, myTask.subTasks ? myTask.subTasks.length : 0)
         if (task.subTasks && task.subTasks.length)
             setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is Task => task !== undefined))
     }, [task])
@@ -85,7 +84,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
     }, [])
 
 
-    function handleTitle(e: React.ChangeEvent<HTMLInputElement>) {
+    function handleTitle(e: React.ChangeEvent<HTMLTextAreaElement>) {
         setMyTask(prev => ({
             ...prev,
             title: e.target.value
@@ -167,22 +166,6 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
     }
 
 
-    const addTag = async (subtaskID: string) => {
-        try {
-            // const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
-            //     _id: task._id,
-            //     subTasks: [...(task.subTasks || []), subtaskID]
-            // })
-            // if (response.status === 200) {
-            //     console.log(`Subtask added successfully : ${response.data}`);
-            //     fetchTasks()
-            //     fetchToday()
-            // }
-        } catch (err) {
-            console.error('Error adding subtask :', err);
-        }
-    }
-
 
     return (
         <Sheet>
@@ -228,7 +211,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         <Label htmlFor="title" className="text-right">
                             Title
                         </Label>
-                        <Input id="title" value={myTask.title} onChange={handleTitle} className="col-span-3" />
+                        <Textarea id="title" value={myTask.title} onChange={handleTitle} className="col-span-3 h-20" />
                     </div>
 
                     {/* Status  */}
@@ -263,7 +246,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         <Label className="text-right">
                             Description
                         </Label>
-                        <Textarea id="description" value={myTask.description} className="col-span-3" onChange={handleDescription} />
+                        <Textarea id="description" value={myTask.description} className={`col-span-3 ${myTask.description && 'h-36'}`} onChange={handleDescription} />
                     </div>
 
                     {/* Tags  */}

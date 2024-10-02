@@ -24,10 +24,7 @@ const updateDay = async (req, res) => {
             .populate({
                 path: 'chunks',
                 populate: {
-                    path: 'tasks',
-                    populate: {
-                        path: 'tags'
-                    }
+                    path: 'tasks'
                 }
             });
         console.log("Day updated !!")
@@ -45,9 +42,6 @@ const getDay = async (req, res) => {
                 path: 'chunks',
                 populate: {
                     path: 'tasks',
-                    populate: {
-                        path: 'tags'
-                    }
                 }
             });
         console.log("Day read !!")

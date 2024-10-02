@@ -36,10 +36,7 @@ const getCurrState = async (req, res) => {
                 populate: {
                     path: 'chunks',
                     populate: {
-                        path: 'tasks',
-                        populate: {
-                            path: 'tags'
-                        }
+                        path: 'tasks'
                     }
                 }
             })

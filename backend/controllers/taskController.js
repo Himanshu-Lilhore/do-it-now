@@ -1,19 +1,60 @@
 const Task = require('../models/taskModel');
 const Tag = require('../models/tagModel');
-
+const axios = require('axios');
 
 const createTask = async (req, res) => {
     try {
+        let { title, status } = req.body;
+        const url = title;
+        let description = '';
+        let tags = [];
+
+        // Check if the title is a YouTube URL
+        const youtubeRegex = /^https?:\/\/(www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/;
+        const match = title.match(youtubeRegex);
+
+        if (match) {
+            const videoId = match[2];
+            console.log(`Fetching details for YouTube video ID: ${videoId}`);
+
+            // Fetch YouTube video details using YouTube Data API
+            const apiKey = process.env.YOUTUBE_DATA_API_KEY;
+            const youtubeUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
+            
+            const response = await axios.get(youtubeUrl);
+            if (response.data.items.length > 0) {
+                const videoDetails = response.data.items[0];
+                const videoTitle = videoDetails.snippet.title;
+                const videoDuration = convertDurationToReadableFormat(videoDetails.contentDetails.duration);
+                const uploadDate = videoDetails.snippet.publishedAt;
+                const channel = videoDetails.snippet.channelTitle
+                title = videoTitle;
+                description = `Channel : ${channel}\nDuration : ${videoDuration}\nUpload Date : ${new Date(uploadDate).toLocaleDateString()}\nURL : ${url}`;
+                
+                const youtubeTag = await Tag.findOne({ name: 'youtube' });
+                if (youtubeTag) {
+                    tags.push(youtubeTag._id);
+                }
+            } else {
+                console.error("YouTube video details not found.");
+                return res.status(400).json({ error: 'Unable to fetch YouTube video details.' });
+            }
+        }
+
         const newTask = await Task.create({
-            ...req.body
-        })
-        console.log("Task created !!")
-        res.status(200).json(newTask)
+            title,
+            description,
+            status,
+            tags
+        });
+
+        console.log("Task created successfully!!");
+        res.status(200).json(newTask);
     } catch (err) {
-        console.log("Error creating task")
-        res.status(400).json({ error: err.message })
+        console.log("Error creating task:", err);
+        res.status(400).json({ error: err.message });
     }
-}
+};
 
 const updateTask = async (req, res) => {
     try {
@@ -87,5 +128,17 @@ const deleteTask = async (req, res) => {
     }
 }
 
+
+function convertDurationToReadableFormat(duration) {
+    // Regular expression to match ISO 8601 duration format
+    const match = duration.match(/P(?:([\d.]+)Y)?(?:([\d.]+)M)?(?:([\d.]+)D)?T(?:([\d.]+)H)?(?:([\d.]+)M)?(?:([\d.]+)S)?/);
+
+    // Extract the time values (hours and minutes)
+    const hours = parseInt(match[4] || 0); // If no hours found, default to 0
+    const minutes = parseInt(match[5] || 0); // If no minutes found, default to 0
+
+    // Construct the formatted string based on availability
+    return `${hours > 0 ? hours + ' hours ' : ''}${minutes > 0 ? minutes + ' minutes' : ''}`.trim();
+}
 
 module.exports = { createTask, updateTask, getTask, getManyTasks, deleteTask }

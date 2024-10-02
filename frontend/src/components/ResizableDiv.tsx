@@ -81,8 +81,16 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
         const alpha = Math.round(opacity * 255).toString(16).padStart(2, '0'); // Convert opacity to 2-digit hex
         return `${hex}${alpha}`;
     };
-    const backgroundColor = applyOpacityToHex(tags[0].color, 0.1);
-    const borderColor = tags[0].color;
+
+    let colorHere = '#646464'
+    if(thisChunk.tasks.length) {
+        if(thisChunk.tasks[0].tags.length){
+            colorHere = tags.find(tag => tag._id.toString() === thisChunk.tasks[0].tags[0].toString())?.color || ''
+        }
+    }
+        
+    const backgroundColor = applyOpacityToHex( colorHere, 0.1);
+    const borderColor = colorHere;
 
 
     // Dragging handlers
