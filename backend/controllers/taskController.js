@@ -20,7 +20,7 @@ const createTask = async (req, res) => {
             // Fetch YouTube video details using YouTube Data API
             const apiKey = process.env.YOUTUBE_DATA_API_KEY;
             const youtubeUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
-            
+
             const response = await axios.get(youtubeUrl);
             if (response.data.items.length > 0) {
                 const videoDetails = response.data.items[0];
@@ -31,7 +31,7 @@ const createTask = async (req, res) => {
                 const responseObj = JSON.stringify(response.data)
                 title = videoTitle;
                 description = `Channel : ${channel}\nDuration : ${videoDuration}\nUpload Date : ${new Date(uploadDate).toLocaleDateString()}\nURL : ${url}\nResponseObj : ${responseObj}`;
-                
+
                 const youtubeTag = await Tag.findOne({ name: 'youtube' });
                 if (youtubeTag) {
                     tags.push(youtubeTag._id);
@@ -72,7 +72,7 @@ const updateTask = async (req, res) => {
 
 const getTask = async (req, res) => {
     try {
-        const myTask = await Task.findOne({...req.body})
+        const myTask = await Task.findOne({ ...req.body })
         console.log("Task read !!")
         res.status(200).json(myTask)
     } catch (err) {
@@ -110,7 +110,6 @@ const getManyTasks = async (req, res) => {
 
         // const allTasks = await Task.populate(aggregatedTasks, { path: 'tags' });
 
-
         res.status(200).json(aggregatedTasks)
     } catch (err) {
         console.log("Error finding tasks")
@@ -120,11 +119,33 @@ const getManyTasks = async (req, res) => {
 
 const deleteTask = async (req, res) => {
     try {
-        await Task.deleteOne({_id: req.body._id})
+        await Task.deleteOne({ _id: req.body._id })
         console.log("Task deleted !!")
-        res.status(200).json("Task deleted !")
+        await Task.updateMany(
+            { subTasks: taskIdToDelete },
+            { $pull: { subTasks: taskIdToDelete } }
+        );
+
+        res.status(200).json("Task deleted and references removed!");
     } catch (err) {
         console.log("Error deleting the task")
+        res.status(400).json({ error: err.message })
+    }
+}
+
+const cleanup = async (req, res) => {
+    try {
+        const allTasks = await Task.find();
+        const taskIds = new Set(allTasks.map(task => task._id.toString()));
+        for (const task of allTasks) {
+            task.subTasks = task.subTasks.filter(subTaskId => taskIds.has(subTaskId.toString()));
+            if (task.isModified()) {
+                await task.save();
+            }
+        }
+        res.status(200).json("Task cleanup successful !")
+    } catch (err) {
+        console.log("Error cleaning up tasks")
         res.status(400).json({ error: err.message })
     }
 }
@@ -142,4 +163,4 @@ function convertDurationToReadableFormat(duration) {
     return `${hours > 0 ? hours + ' hours ' : ''}${minutes > 0 ? minutes + ' minutes' : ''}`.trim();
 }
 
-module.exports = { createTask, updateTask, getTask, getManyTasks, deleteTask }
+module.exports = { createTask, updateTask, getTask, getManyTasks, deleteTask, cleanup }

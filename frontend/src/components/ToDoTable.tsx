@@ -132,11 +132,17 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                             <div>{task.title}</div>
                                         </div>
                                     </TableCell>
-                                    {!superTaskID && <TableCell>
-                                        <div className="size-5">
-                                            {task.status === 'pending' ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)}
-                                        </div>
-                                    </TableCell>}
+                                    {!superTaskID &&
+                                        <TableCell>
+                                            <div className="size-5">
+                                                {
+                                                    (task.subTasks && task.subTasks.length) ?
+                                                        <div>{task.subTasks.map(str=>tasks.find(one=>one._id===str)).filter(taskk => taskk?.status === 'done').length * 100 / task.subTasks.length}</div>
+                                                        :
+                                                        (task.status === 'pending') ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)
+                                                }
+                                            </div>
+                                        </TableCell>}
                                     {!superTaskID && <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>}
                                     <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} /></TableCell>
                                 </TableRow>
