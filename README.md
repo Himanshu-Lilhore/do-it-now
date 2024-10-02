@@ -2,7 +2,8 @@
 
 **Do-It-Now** is a personal task management system that helps you organize your day into structured chunks, track your progress, and manage your daily activities. The project is built using modern web technologies like `React` and `Node.js` (`ShadCN` for UI), with features such as custom scheduling, dynamic task tracking, and performance evaluation based on user-defined activity metrics.
 
-![image](https://github.com/user-attachments/assets/68197546-137a-4d86-8c1d-8099a2bd22d4)
+![image](https://github.com/user-attachments/assets/520778cd-a4fa-4213-ab85-492338bd1ebb)
+
 
 ## Features
 
