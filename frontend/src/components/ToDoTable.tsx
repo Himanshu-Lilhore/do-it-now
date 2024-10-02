@@ -137,7 +137,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                             <div className="size-5">
                                                 {
                                                     (task.subTasks && task.subTasks.length) ?
-                                                        <div>{task.subTasks.map(str=>tasks.find(one=>one._id===str)).filter(taskk => taskk?.status === 'done').length * 100 / task.subTasks.length}</div>
+                                                        <div>{`${task.subTasks.map(str=>tasks.find(one=>one._id===str)).filter(taskk => taskk?.status === 'done').length}/${task.subTasks.length}`}</div>
                                                         :
                                                         (task.status === 'pending') ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)
                                                 }
