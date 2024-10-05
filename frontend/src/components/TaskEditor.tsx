@@ -179,38 +179,40 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
         let uploadDate = null;
         let url = '';
 
-        try {
-            const lines = task.description.split('\n');
+        if (task.description) {
+            try {
+                const lines = task.description.split('\n');
 
-            lines.forEach(line => {
-                if (line.startsWith('Channel : ')) {
-                    channelName = line.replace('Channel : ', '');
-                } else if (line.startsWith('Duration : ')) {
-                    duration = line.replace('Duration : ', '');
-                } else if (line.startsWith('Upload Date : ')) {
-                    uploadDate = line.replace('Upload Date : ', '');
-                } else if (line.startsWith('URL : ')) {
-                    url = line.replace('URL : ', '');
-                } else if (line.startsWith('ResponseObj : ')) {
-                    const responseObjString = line.replace('ResponseObj : ', '');
+                lines.forEach(line => {
+                    if (line.startsWith('Channel : ')) {
+                        channelName = line.replace('Channel : ', '');
+                    } else if (line.startsWith('Duration : ')) {
+                        duration = line.replace('Duration : ', '');
+                    } else if (line.startsWith('Upload Date : ')) {
+                        uploadDate = line.replace('Upload Date : ', '');
+                    } else if (line.startsWith('URL : ')) {
+                        url = line.replace('URL : ', '');
+                    } else if (line.startsWith('ResponseObj : ')) {
+                        const responseObjString = line.replace('ResponseObj : ', '');
 
-                    try {
-                        const responseObj = JSON.parse(responseObjString);
+                        try {
+                            const responseObj = JSON.parse(responseObjString);
 
-                        videoTitle = responseObj.items[0].snippet.title;
-                        thumbnailUrl = responseObj.items[0].snippet.thumbnails.high.url ||
-                            responseObj.items[0].snippet.thumbnails.default.url;
+                            videoTitle = responseObj.items[0].snippet.title;
+                            thumbnailUrl = responseObj.items[0].snippet.thumbnails.high.url ||
+                                responseObj.items[0].snippet.thumbnails.default.url;
 
-                        setVidURL(url);
-                        setChannel(channelName)
-                        setThumbnailURL(thumbnailUrl);
-                    } catch (error) {
-                        console.error('Failed to parse ResponseObj:', error);
+                            setVidURL(url);
+                            setChannel(channelName)
+                            setThumbnailURL(thumbnailUrl);
+                        } catch (error) {
+                            console.error('Failed to parse ResponseObj:', error);
+                        }
                     }
-                }
-            });
-        } catch (err) {
-            console.error('Failed to parse task description', err);
+                });
+            } catch (err) {
+                console.error('Failed to parse task description', err);
+            }
         }
     }
 
@@ -314,7 +316,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                                 if (subTask._id !== task._id)
                                                     return (
                                                         <TableRow key={subTask._id}>
-                                                            <TableCell className="font-medium min-w-44">{((subTask.tags.length && (tags.find(tag => tag._id === subTask.tags[0])?.name) === 'youtube')) ? '▶ ': ''}{subTask.title}</TableCell>
+                                                            <TableCell className="font-medium min-w-44">{((subTask.tags.length && (tags.find(tag => tag._id === subTask.tags[0])?.name) === 'youtube')) ? '▶ ' : ''}{subTask.title}</TableCell>
                                                             <TableCell className="min-w-24">{subTask.deadline ? `${new Date(subTask.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
                                                             <TableCell onClick={() => addSubtasks(subTask._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
                                                         </TableRow>
