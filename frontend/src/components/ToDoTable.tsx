@@ -129,7 +129,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                     <TableCell className={`${task.subTasks && task.subTasks.length ? 'underline underline-offset-4' : ''} font-medium max-w-64 whitespace-nowrap overflow-hidden text-ellipsis`}>
                                         <div className="flex flex-row h-full items-center gap-3">
                                             {(task.tags && tags.find(tag => tag._id === task.tags[0])?.name === 'youtube') && <div><YoutubeIcon /></div>}
-                                            <div>{task.title}</div>
+                                            <div className={`${task.status === 'done' ? 'line-through decoration-stone-700 decoration-2' : ''}`}>{task.title}</div>
                                         </div>
                                     </TableCell>
                                     {!superTaskID &&

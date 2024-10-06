@@ -259,9 +259,9 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                     {/* thumbnail  */}
                     {((task.tags.length && (tags.find(tag => tag._id === task.tags[0])?.name) === 'youtube')) ?
                         <div className="flex w-full justify-center  px-3">
-                            <div className="relative w-fit overflow-hidden rounded-lg hover:saturate-200 hover:scale-105 transition-all duration-300">
+                            <div className="relative w-fit overflow-hidden rounded-lg saturate-75 hover:saturate-150 hover:scale-105 transition-all duration-300">
                                 <a href={vidURL} target='_blank'>
-                                    <img src={thumbnailURL} alt={`thumbnail`} />
+                                    <img className='' src={thumbnailURL} alt={`thumbnail`} />
                                 </a>
                                 <div className="text-black w-full font-bold absolute z-10 bottom-0 opacity-50 bg-gray-500/80 text-center">{channel}</div>
                             </div>
