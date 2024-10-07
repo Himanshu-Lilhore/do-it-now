@@ -24,8 +24,8 @@ interface Task {
     status: string,
     tags: string[],
     subTasks: string[],
-	createdAt: string,
-	updatedAt: string
+    createdAt: string,
+    updatedAt: string
 }
 interface Tag {
     name: string,
@@ -42,10 +42,23 @@ type TaskStatus = 'in-prog' | 'pending' | 'done';
 
 export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[] }) {
     const [input, setInput] = useState<string>('')
+    const [filteredOptions, setFilteredOptions] = useState(allTasks);
 
     useEffect(() => {
         fetchTasks()
     }, [])
+
+    useEffect(() => {
+        setFilteredOptions(allTasks);
+    }, [allTasks])
+
+    useEffect(() => {
+        const filtered = allTasks.filter(task => {
+            return task.title.toLowerCase().includes(input.toLowerCase())
+        }
+        );
+        setFilteredOptions(filtered);
+    }, [input, allTasks])
 
 
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -112,7 +125,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
     };
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 max-w-[32rem]">
             {/* Table */}
             <div className="max-h-[33rem] overflow-scroll">
                 <Table>
@@ -128,11 +141,11 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                     <TableBody className="">
                         {tasks.sort((task1, task2) => {
                             let val1, val2
-                            if(task1.status === 'in-progress') val1 = 0;
-                            else if(task1.status === 'pending') val1 = 1;
+                            if (task1.status === 'in-progress') val1 = 0;
+                            else if (task1.status === 'pending') val1 = 1;
                             else val1 = 2;
-                            if(task2.status === 'in-progress') val2 = 0;
-                            else if(task2.status === 'pending') val2 = 1;
+                            if (task2.status === 'in-progress') val2 = 0;
+                            else if (task2.status === 'pending') val2 = 1;
                             else val2 = 2;
                             return val1 - val2;
                         }).map((task, index) => {
@@ -150,7 +163,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                             <div className={`size-5 items-center`}>
                                                 {
                                                     (task.subTasks && task.subTasks.length) ?
-                                                        <div className={`w-fit h-fit px-1 rounded-sm text-nowrap text-sm align-middle text-black font-black font-mono ${(task.subTasks && task.subTasks.length) && (task.status === 'pending') ? ' bg-yellow-500/90 ' : (task.status === 'in-progress' ? ' bg-lime-500 ' : 'bg-zinc-500')}`}>{`${task.subTasks.map(str=>tasks.find(one=>one._id===str)).filter(taskk => taskk?.status === 'done').length}/${task.subTasks.length}`}</div>
+                                                        <div className={`w-fit h-fit px-1 rounded-sm text-nowrap text-sm align-middle text-black font-black font-mono ${(task.subTasks && task.subTasks.length) && (task.status === 'pending') ? ' bg-yellow-500/90 ' : (task.status === 'in-progress' ? ' bg-lime-500 ' : 'bg-zinc-500')}`}>{`${task.subTasks.map(str => tasks.find(one => one._id === str)).filter(taskk => taskk?.status === 'done').length}/${task.subTasks.length}`}</div>
                                                         :
                                                         (task.status === 'pending') ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)
                                                 }
@@ -167,9 +180,35 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
 
 
             {/* Input */}
-            <div className='flex flex-row gap-4 sticky bottom-0 right-0 p-4 bg-background'>
-                <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="Add more..." />
-                <Button type="submit" onClick={createTask}>Create</Button>
+            <div className='flex flex-col sticky bottom-0 right-0 bg-background'>
+                {/* Suggestions  */}
+                {(filteredOptions.length>0 && input) && (
+                    <div className="bg-zinc-900/80 flex flex-col overflow-y-scroll border-4 border-blue-950 rounded-lg p-4 gap-1 max-h-64">
+                        {filteredOptions.map((option) => (
+                            <div
+                                key={option._id}
+                                className="flex flex-row justify-between items-center py-1 px-2 border rounded-md hover:bg-zinc-800 transition-all duration-150 text-ellipsis"
+                            >
+                                <div className={`flex flex-row whitespace-pre text-ellipsis overflow-hidden ${option.status === 'done' ? 'line-through decoration-red-700 decoration-2' : ''}`}>
+                                    <div>
+                                        {option.title.slice(0, option.title.toLowerCase().indexOf(input.toLowerCase()))}
+                                    </div>
+                                    <div className="text-amber-400">
+                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase()), option.title.toLowerCase().indexOf(input.toLowerCase())+input.length)}
+                                    </div>
+                                    <div>
+                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase())+input.length, )}
+                                    </div>
+                                </div>
+                                <TaskEditor task={option} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} />
+                            </div>
+                        ))}
+                    </div>
+                )}
+                <div className='flex flex-row gap-4 p-4'>
+                    <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="Add more..." />
+                    <Button type="submit" onClick={createTask}>Create</Button>
+                </div>
             </div>
         </div>
     )
