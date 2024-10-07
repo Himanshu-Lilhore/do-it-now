@@ -261,7 +261,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         /* Subtasks  */
                         <div className="my-3 flex flex-col">
                             <Progress value={subTasks.filter(task => task.status === 'done').length * 100 / subTasks.length} />
-                            <Label  className="pl-2 pt-3 pb-1">
+                            <Label className="pl-2 pt-3 pb-1">
                                 Sub-tasks
                             </Label>
                             <div className="flex flex-col border rounded-lg p-3 my-1">
@@ -378,8 +378,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         <Label htmlFor="tags" className="text-right mt-2">
                             Tags
                         </Label>
-                        <div className="col-span-3 flex flex-row gap-3 flex-wrap
-                        rounded-md border border-input bg-transparent p-2 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
+                        <div className="col-span-3 flex flex-row gap-3 flex-wrap rounded-md border border-input bg-transparent p-2 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
                             <div className="flex flex-row gap-2 flex-wrap">
                                 {myTask.tags
                                     .map(thisStr => tags.find(tagg => tagg._id.toString() === thisStr.toString()))
@@ -406,21 +405,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         </div>
                     </div>
 
-                    {/* Created & updated  */}
-                    <>
-                        <div className="grid grid-cols-4 items-center gap-4 opacity-20">
-                            <Label className="text-right">
-                                Created
-                            </Label>
-                            <Label className="text-nowrap">{showDateTime(myTask.createdAt)}</Label>
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4 opacity-20">
-                            <Label className="text-right">
-                                Updated
-                            </Label>
-                            <Label className="text-nowrap">{showDateTime(myTask.updatedAt)}</Label>
-                        </div>
-                    </>
+
 
                 </div>
                 <SheetFooter className="flex flex-col w-full pt-8">
@@ -440,7 +425,25 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                     <SheetClose asChild>
                         <Button type="submit" onClick={handleSubmit}>Save changes</Button>
                     </SheetClose>
+
                 </SheetFooter>
+
+                {/* Created & updated  */}
+                <div className="grid gap-4 gap-2 p-2 mt-6 opacity-5 hover:opacity-50 trasition-all duration-200">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">
+                            Created :
+                        </Label>
+                        <Label className="text-nowrap">{showDateTime(myTask.createdAt)}</Label>
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                        <Label className="text-right">
+                            Updated :
+                        </Label>
+                        <Label className="text-nowrap">{showDateTime(myTask.updatedAt)}</Label>
+                    </div>
+                </div>
+
             </SheetContent>
         </Sheet>
     )
