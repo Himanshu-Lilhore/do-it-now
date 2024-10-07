@@ -48,7 +48,9 @@ interface Task {
     deadline: Date,
     status: string,
     tags: string[],
-    subTasks: string[]
+    subTasks: string[],
+    createdAt: string,
+    updatedAt: string
 }
 interface Props {
     task: Task,
@@ -80,6 +82,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
     const { toast } = useToast()
 
     useEffect(() => {
+        setMyTask(task)
         if (task.subTasks && task.subTasks.length)
             setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is Task => task !== undefined))
     }, [task])
@@ -216,6 +219,26 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
         }
     }
 
+    function showDateTime(theDate: string) {
+        const timeFormat: Intl.DateTimeFormatOptions = {
+            hour12: true,
+            hour: 'numeric',
+            minute: 'numeric',
+        };
+        const parsedDate = new Date(theDate);
+
+        const day = parsedDate.getDate().toString().padStart(2, '0');
+        const month = parsedDate.toLocaleString('en-US', { month: 'short' });
+        const year = parsedDate.getFullYear().toString().slice(-2);
+
+        const datePart = `${day} ${month} ${year}`;
+
+        const timePart = parsedDate.toLocaleTimeString('en-US', timeFormat);
+
+        return `${datePart} - ${timePart}`;
+    }
+
+
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -236,9 +259,9 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                     (subTasks && subTasks.length)
                         ?
                         /* Subtasks  */
-                        <div className="my-3">
+                        <div className="my-3 flex flex-col">
                             <Progress value={subTasks.filter(task => task.status === 'done').length * 100 / subTasks.length} />
-                            <Label htmlFor="subtasks" className="pl-2">
+                            <Label  className="pl-2 pt-3 pb-1">
                                 Sub-tasks
                             </Label>
                             <div className="flex flex-col border rounded-lg p-3 my-1">
@@ -269,16 +292,16 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                     }
 
                     {/* title  */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="title" className="text-right">
+                    <div className="grid grid-cols-4 gap-4">
+                        <Label htmlFor="title" className="text-right mt-2">
                             Title
                         </Label>
                         <Textarea id="title" value={myTask.title} onChange={handleTitle} className="col-span-3 h-20" />
                     </div>
 
                     {/* Status  */}
-                    <div className="grid grid-cols-4 items-center gap-4 text-nowrap">
-                        <Label htmlFor="status" className="text-right">
+                    <div className="grid grid-cols-4 gap-4 text-nowrap">
+                        <Label htmlFor="status" className="text-right mt-2">
                             Status
                         </Label>
                         <div className="relative flex w-fit items-center">
@@ -330,8 +353,8 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                     </div>
 
                     {/* Deadline  */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="deadline" className="text-right">
+                    <div className="grid grid-cols-4 gap-4">
+                        <Label htmlFor="deadline" className="text-right mt-2">
                             Deadline
                         </Label>
                         <Calendar
@@ -343,19 +366,20 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                     </div>
 
                     {/* Description  */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label className="text-right">
+                    <div className="grid grid-cols-4  gap-4">
+                        <Label className="text-right mt-2">
                             Description
                         </Label>
                         <Textarea id="description" value={myTask.description} className={`col-span-3 ${myTask.description && 'h-36'}`} onChange={handleDescription} />
                     </div>
 
                     {/* Tags  */}
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="tags" className="text-right">
+                    <div className="grid grid-cols-4 gap-4">
+                        <Label htmlFor="tags" className="text-right mt-2">
                             Tags
                         </Label>
-                        <div className="col-span-3 flex flex-row gap-3 flex-wrap">
+                        <div className="col-span-3 flex flex-row gap-3 flex-wrap
+                        rounded-md border border-input bg-transparent p-2 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50">
                             <div className="flex flex-row gap-2 flex-wrap">
                                 {myTask.tags
                                     .map(thisStr => tags.find(tagg => tagg._id.toString() === thisStr.toString()))
@@ -363,11 +387,11 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                     .map((tag, index) => (
                                         <div
                                             key={tag?._id || index}
-                                            className="text-black font-medium py-1 pl-4 pr-2 border rounded-full flex flex-row gap-2 items-center"
+                                            className="text-black text-sm font-mono font-semibold pl-3 pr-1 py-1 border rounded-full flex flex-row gap-2 items-center"
                                             style={{ backgroundColor: tag?.color }}
                                         >
                                             <div className="text-black">
-                                                {((str: string) => str.charAt(0).toUpperCase() + str.slice(1))(tag?.name || "")}
+                                                {tag?.name.toUpperCase()}
                                             </div>
                                             <div onClick={() => setMyTask(prev => ({ ...prev, tags: prev.tags.filter(id => id !== tag?._id) }))}>
                                                 <CloseIcon />
@@ -382,6 +406,21 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         </div>
                     </div>
 
+                    {/* Created & updated  */}
+                    <>
+                        <div className="grid grid-cols-4 items-center gap-4 opacity-20">
+                            <Label className="text-right">
+                                Created
+                            </Label>
+                            <Label className="text-nowrap">{showDateTime(myTask.createdAt)}</Label>
+                        </div>
+                        <div className="grid grid-cols-4 items-center gap-4 opacity-20">
+                            <Label className="text-right">
+                                Updated
+                            </Label>
+                            <Label className="text-nowrap">{showDateTime(myTask.updatedAt)}</Label>
+                        </div>
+                    </>
 
                 </div>
                 <SheetFooter className="flex flex-col w-full pt-8">
@@ -393,7 +432,9 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                 onCheckedChange={() => setDel(prev => !prev)}
                             />
                         </div>
-                        <Button variant="destructive" className="w-5/6" onClick={handleDelete}>Delete</Button>
+                        <SheetClose asChild>
+                            <Button variant="destructive" className="w-5/6" onClick={handleDelete}>Delete</Button>
+                        </SheetClose>
                     </div>
 
                     <SheetClose asChild>

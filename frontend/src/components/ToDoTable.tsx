@@ -23,7 +23,9 @@ interface Task {
     deadline: Date,
     status: string,
     tags: string[],
-    subTasks: string[]
+    subTasks: string[],
+	createdAt: string,
+	updatedAt: string
 }
 interface Tag {
     name: string,

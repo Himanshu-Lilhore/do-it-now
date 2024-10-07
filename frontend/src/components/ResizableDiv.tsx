@@ -30,7 +30,9 @@ interface Task {
     description: string,
     deadline: Date,
     status: string,
-    tags: string[]
+    tags: string[],
+	createdAt: string,
+	updatedAt: string
 }
 interface ResizableDivProps {
     thisChunk: {

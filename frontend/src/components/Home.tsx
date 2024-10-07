@@ -41,7 +41,9 @@ interface Task {
 	deadline: Date,
 	status: string,
 	tags: string[],
-	subTasks: string[]
+	subTasks: string[],
+	createdAt: string,
+	updatedAt: string
 }
 interface Tag {
 	name: string,
@@ -68,7 +70,9 @@ export default function Home() {
 			deadline: new Date(), // Set to current date/time
 			status: 'pending',
 			tags: ['tag1'],
-			subTasks: []
+			subTasks: [],
+			createdAt: (new Date()).toString(),
+			updatedAt: (new Date()).toString()
 		}
 	]);
 

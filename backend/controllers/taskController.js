@@ -109,7 +109,6 @@ const getManyTasks = async (req, res) => {
         }
 
         // const allTasks = await Task.populate(aggregatedTasks, { path: 'tags' });
-
         res.status(200).json(aggregatedTasks)
     } catch (err) {
         console.log("Error finding tasks")
@@ -122,8 +121,8 @@ const deleteTask = async (req, res) => {
         await Task.deleteOne({ _id: req.body._id })
         console.log("Task deleted !!")
         await Task.updateMany(
-            { subTasks: taskIdToDelete },
-            { $pull: { subTasks: taskIdToDelete } }
+            { subTasks: req.body._id },
+            { $pull: { subTasks: req.body._id } }
         );
 
         res.status(200).json("Task deleted and references removed!");
