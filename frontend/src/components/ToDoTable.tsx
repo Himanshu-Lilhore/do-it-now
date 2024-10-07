@@ -37,6 +37,8 @@ import InProgIcon from "@/assets/taskStatus/InProgIcon"
 import PendingIcon from "@/assets/taskStatus/PendingIcon"
 import DoneIcon from "@/assets/taskStatus/DoneIcon"
 import YoutubeIcon from "@/assets/YoutubeIcon"
+type TaskStatus = 'in-prog' | 'pending' | 'done';
+
 
 export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[] }) {
     const [input, setInput] = useState<string>('')
@@ -124,7 +126,16 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                         </TableRow>
                     </TableHeader>
                     <TableBody className="">
-                        {tasks.map((task, index) => {
+                        {tasks.sort((task1, task2) => {
+                            let val1, val2
+                            if(task1.status === 'in-progress') val1 = 0;
+                            else if(task1.status === 'pending') val1 = 1;
+                            else val1 = 2;
+                            if(task2.status === 'in-progress') val2 = 0;
+                            else if(task2.status === 'pending') val2 = 1;
+                            else val2 = 2;
+                            return val1 - val2;
+                        }).map((task, index) => {
                             return (
                                 <TableRow key={task._id}>
                                     <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
@@ -136,10 +147,10 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                     </TableCell>
                                     {!superTaskID &&
                                         <TableCell>
-                                            <div className="size-5">
+                                            <div className={`size-5 items-center`}>
                                                 {
                                                     (task.subTasks && task.subTasks.length) ?
-                                                        <div>{`${task.subTasks.map(str=>tasks.find(one=>one._id===str)).filter(taskk => taskk?.status === 'done').length}/${task.subTasks.length}`}</div>
+                                                        <div className={`w-fit h-fit px-1 rounded-sm text-nowrap text-sm align-middle text-black font-black font-mono ${(task.subTasks && task.subTasks.length) && (task.status === 'pending') ? ' bg-yellow-500/90 ' : (task.status === 'in-progress' ? ' bg-lime-500 ' : 'bg-zinc-500')}`}>{`${task.subTasks.map(str=>tasks.find(one=>one._id===str)).filter(taskk => taskk?.status === 'done').length}/${task.subTasks.length}`}</div>
                                                         :
                                                         (task.status === 'pending') ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)
                                                 }

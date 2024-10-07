@@ -277,7 +277,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         </div>
                         : <></>
                 }
-                <div className="grid gap-6 py-4">
+                <div className="grid gap-5 py-4">
 
                     {/* thumbnail  */}
                     {((task.tags.length && (tags.find(tag => tag._id === task.tags[0])?.name) === 'youtube')) ?
