@@ -17,7 +17,9 @@ interface Task {
     tags: string[],
     subTasks: string[],
 	createdAt: string,
-	updatedAt: string
+	updatedAt: string,
+	taskNum: number,
+	repeat: boolean
 }
 interface Tag {
     name: string,

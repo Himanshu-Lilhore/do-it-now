@@ -1,9 +1,11 @@
 const Task = require('../models/taskModel');
 const Tag = require('../models/tagModel');
+const Stat = require('../models/statModel');
 const axios = require('axios');
 
 const createTask = async (req, res) => {
     try {
+        console.log(req.body)
         let { title, status } = req.body;
         const url = title;
         let description = '';
@@ -42,11 +44,23 @@ const createTask = async (req, res) => {
             }
         }
 
+        let stats = await Stat.findOne({})
+
+        try {
+            stats.totalTasks++;
+            await stats.save();
+        } catch (err2) {
+            console.log("Error updating task count :", err2);
+            res.status(400).json({ error: err2.message });
+        }
+
         const newTask = await Task.create({
+            tags,
+            ...req.body,
             title,
             description,
             status,
-            tags
+            taskNum: stats.totalTasks
         });
 
         console.log("Task created successfully!!");
@@ -61,6 +75,23 @@ const updateTask = async (req, res) => {
     try {
         const taskId = req.body._id
         console.log(taskId)
+        const myTask = await Task.findOne({ _id: taskId })
+        console.log(`repeat : ${myTask.repeat}, prevStatus : ${myTask.status}, newStatus : ${req.body.status}`)
+        if (myTask.repeat && myTask.status !== 'done' && req.body.status === 'done') {
+            console.log("creating new (repeat) task...")
+            try {
+                const newTaskData = myTask.toObject();
+                newTaskData.status = 'pending';
+                delete newTaskData._id;
+                delete newTaskData.createdAt;
+                delete newTaskData.updatedAt;
+
+                await createTaskInternal(newTaskData);
+            } catch (err2) {
+                console.log("Error creating repeat task")
+                res.status(400).json({ error: err2.message })
+            }
+        }
         const updatedTask = await Task.findByIdAndUpdate(taskId, { ...req.body }, { new: true });
         console.log(`Task updated !!`)
         res.status(200).json(updatedTask)
@@ -161,5 +192,68 @@ function convertDurationToReadableFormat(duration) {
     // Construct the formatted string based on availability
     return `${hours > 0 ? hours + ' hours ' : ''}${minutes > 0 ? minutes + ' minutes' : ''}`.trim();
 }
+
+
+const createTaskInternal = async (taskData) => {
+    try {
+        let { title, status } = taskData;
+        const url = title;
+        let description = '';
+        let tags = [];
+
+        // Check if the title is a YouTube URL
+        const youtubeRegex = /^https?:\/\/(www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]{11})/;
+        const match = title.match(youtubeRegex);
+
+        if (match) {
+            const videoId = match[2];
+            console.log(`Fetching details for YouTube video ID: ${videoId}`);
+
+            // Fetch YouTube video details using YouTube Data API
+            const apiKey = process.env.YOUTUBE_DATA_API_KEY;
+            const youtubeUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${apiKey}&part=snippet,contentDetails`;
+
+            const response = await axios.get(youtubeUrl);
+            if (response.data.items.length > 0) {
+                const videoDetails = response.data.items[0];
+                const videoTitle = videoDetails.snippet.title;
+                const videoDuration = convertDurationToReadableFormat(videoDetails.contentDetails.duration);
+                const uploadDate = videoDetails.snippet.publishedAt;
+                const channel = videoDetails.snippet.channelTitle;
+                const responseObj = JSON.stringify(response.data);
+                title = videoTitle;
+                description = `Channel : ${channel}\nDuration : ${videoDuration}\nUpload Date : ${new Date(uploadDate).toLocaleDateString()}\nURL : ${url}\nResponseObj : ${responseObj}`;
+
+                const youtubeTag = await Tag.findOne({ name: 'youtube' });
+                if (youtubeTag) {
+                    tags.push(youtubeTag._id);
+                }
+            } else {
+                console.error("YouTube video details not found.");
+                throw new Error('Unable to fetch YouTube video details.');
+            }
+        }
+
+        let stats = await Stat.findOne({});
+        stats.totalTasks++;
+        await stats.save();
+
+        const newTask = await Task.create({
+            tags,
+            ...taskData,
+            title,
+            description,
+            status,
+            taskNum: stats.totalTasks
+        });
+
+        console.log("Created new repeat task")
+
+        return newTask;
+    } catch (err) {
+        console.log("Error creating task:", err);
+        throw err;
+    }
+};
 
 module.exports = { createTask, updateTask, getTask, getManyTasks, deleteTask, cleanup }

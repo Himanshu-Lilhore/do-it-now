@@ -32,7 +32,9 @@ interface Task {
     status: string,
     tags: string[],
 	createdAt: string,
-	updatedAt: string
+	updatedAt: string,
+	taskNum: number,
+	repeat: boolean
 }
 interface ResizableDivProps {
     thisChunk: {

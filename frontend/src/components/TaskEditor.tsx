@@ -50,7 +50,9 @@ interface Task {
     tags: string[],
     subTasks: string[],
     createdAt: string,
-    updatedAt: string
+    updatedAt: string,
+    taskNum: number,
+    repeat: boolean
 }
 interface Props {
     task: Task,
@@ -248,12 +250,14 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                     </svg>
                 </Button>
             </SheetTrigger>
+
             <SheetContent className="overflow-auto">
                 <SheetHeader>
-                    <SheetTitle className="font-bold">EDIT TASK</SheetTitle>
-                    {/* <SheetDescription>
-                      
-                    </SheetDescription> */}
+                    <SheetTitle className="font-bold flex flex-row">
+                        <div>EDIT TASK</div>
+                        <div className="whitespace-pre opacity-25">{` #${myTask.taskNum}`}</div>
+                    </SheetTitle>
+                    <SheetDescription></SheetDescription>
                 </SheetHeader>
                 {
                     (subTasks && subTasks.length)
@@ -365,8 +369,23 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         />
                     </div>
 
+                    {/* Repeat  */}
+                    <div className="grid grid-cols-4 gap-4">
+                        <Label className="text-right ">Repeat</Label>
+                        <Checkbox
+                            className={`col-span-3 items-center`}
+                            checked={myTask.repeat}
+                            onCheckedChange={() => {
+                                setMyTask(prev => ({
+                                    ...prev,
+                                    repeat: !prev.repeat
+                                }))
+                            }}
+                        />
+                    </div>
+
                     {/* Description  */}
-                    <div className="grid grid-cols-4  gap-4">
+                    <div className="grid grid-cols-4 gap-4">
                         <Label className="text-right mt-2">
                             Description
                         </Label>
@@ -405,9 +424,9 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         </div>
                     </div>
 
-
-
                 </div>
+
+                {/* Delete & submit  */}
                 <SheetFooter className="flex flex-col w-full pt-8">
                     <div className="flex flex-row items-center gap-10">
                         <div className="flex flex-row items-center gap-2">

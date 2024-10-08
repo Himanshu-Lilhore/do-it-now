@@ -24,6 +24,10 @@ const StatSchema = new mongoose.Schema({
     totalWorkHrs: {
         type: Number,
         default: 0
+    },
+    totalTasks: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

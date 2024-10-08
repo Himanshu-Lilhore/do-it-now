@@ -43,7 +43,9 @@ interface Task {
 	tags: string[],
 	subTasks: string[],
 	createdAt: string,
-	updatedAt: string
+	updatedAt: string,
+	taskNum: number,
+	repeat: boolean
 }
 interface Tag {
 	name: string,
@@ -72,7 +74,9 @@ export default function Home() {
 			tags: ['tag1'],
 			subTasks: [],
 			createdAt: (new Date()).toString(),
-			updatedAt: (new Date()).toString()
+			updatedAt: (new Date()).toString(),
+			taskNum: -1,
+			repeat: false
 		}
 	]);
 
