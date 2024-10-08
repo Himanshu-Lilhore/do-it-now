@@ -276,7 +276,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                     superTaskID={task._id}
                                     allTasks={allTasks}
                                     tags={tags}
-                                    className="max-h-96 overflow-y-scroll"
+                                    className="max-h-[30rem] overflow-y-scroll"
                                 />
                             </div>
                         </div>
