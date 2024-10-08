@@ -26,8 +26,8 @@ interface Task {
     subTasks: string[],
     createdAt: string,
     updatedAt: string,
-	taskNum: number,
-	repeat: boolean
+    taskNum: number,
+    repeat: boolean
 }
 interface Tag {
     name: string,
@@ -42,7 +42,7 @@ import YoutubeIcon from "@/assets/YoutubeIcon"
 type TaskStatus = 'in-prog' | 'pending' | 'done';
 
 
-export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[] }) {
+export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags, className }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[], className?: string }) {
     const [input, setInput] = useState<string>('')
     const [filteredOptions, setFilteredOptions] = useState(allTasks);
 
@@ -129,7 +129,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
     return (
         <div className="flex flex-col gap-4 max-w-[32rem]">
             {/* Table */}
-            <div className="max-h-[33rem] overflow-scroll">
+            <div className={`max-h-[33rem] overflow-scroll` +  className?className:''}>
                 <Table>
                     <TableHeader>
                         <TableRow>
@@ -184,7 +184,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
             {/* Input */}
             <div className='flex flex-col sticky bottom-0 right-0 bg-background'>
                 {/* Suggestions  */}
-                {(filteredOptions.length>0 && input) && (
+                {(filteredOptions.length > 0 && input) && (
                     <div className="bg-zinc-900/80 flex flex-col overflow-y-scroll border-4 border-blue-950 rounded-lg p-4 gap-1 max-h-64">
                         {filteredOptions.map((option) => (
                             <div
@@ -192,14 +192,15 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                 className="flex flex-row justify-between items-center py-1 px-2 border rounded-md hover:bg-zinc-800 transition-all duration-150 text-ellipsis"
                             >
                                 <div className={`flex flex-row whitespace-pre text-ellipsis overflow-hidden ${option.status === 'done' ? 'line-through decoration-red-700 decoration-2' : ''}`}>
+                                    {(option.tags && tags.find(tag => tag._id === option.tags[0])?.name === 'youtube') && <div className="pr-2"><YoutubeIcon /></div>}
                                     <div>
                                         {option.title.slice(0, option.title.toLowerCase().indexOf(input.toLowerCase()))}
                                     </div>
                                     <div className="text-amber-400">
-                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase()), option.title.toLowerCase().indexOf(input.toLowerCase())+input.length)}
+                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase()), option.title.toLowerCase().indexOf(input.toLowerCase()) + input.length)}
                                     </div>
                                     <div>
-                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase())+input.length, )}
+                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase()) + input.length,)}
                                     </div>
                                 </div>
                                 <TaskEditor task={option} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} />

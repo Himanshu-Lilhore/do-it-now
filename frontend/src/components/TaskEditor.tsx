@@ -266,7 +266,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                         <div className="my-3 flex flex-col">
                             <Progress value={subTasks.filter(task => task.status === 'done').length * 100 / subTasks.length} />
                             <Label className="pl-2 pt-3 pb-1">
-                                Sub-tasks
+                                Sub-tasks {`(  ${subTasks.filter(task => task.status === 'done').length} / ${subTasks.length} )`}
                             </Label>
                             <div className="flex flex-col border rounded-lg p-3 my-1">
                                 <ToDoTable
@@ -276,6 +276,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                     superTaskID={task._id}
                                     allTasks={allTasks}
                                     tags={tags}
+                                    className="max-h-96 overflow-y-scroll"
                                 />
                             </div>
                         </div>
