@@ -178,7 +178,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
 
                             return val1 - val2;
                         }).map((task, index) => {
-                            if (list.toLowerCase() === 'all' || tags.find(tag => tag._id === task.tags[0])?.category === list.toLowerCase())
+                            if (list.toLowerCase() === 'all' || tags.find(tag => tag._id === task.tags[0])?.category === list.toLowerCase() || superTaskID)
                                 return (
                                     <TableRow key={task._id}>
                                         <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
