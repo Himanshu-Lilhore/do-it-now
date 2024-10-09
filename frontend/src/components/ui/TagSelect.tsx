@@ -28,18 +28,20 @@ interface Tag {
     _id: string
 }
 
-export default function TagSelect({ myTask, setMyTask, title, tags }: { myTask: Task, setMyTask: (Dispatch<SetStateAction<Task>>), title: string, tags: Tag[] }) {
+export default function TagSelect({ myTask, setMyTask, title, tags, handleTagging }: { myTask: Task, setMyTask?: (Dispatch<SetStateAction<Task>>), title: string, tags: Tag[], handleTagging?: (val1:string, val2:string) => void }) {
 
     const handleValueChange = (value: string) => {
-        setMyTask(prev => ({
+        setMyTask && setMyTask(prev => ({
             ...prev,
             tags: [...prev.tags, value]
         }));
+
+        handleTagging && handleTagging(myTask._id, value);
     };
 
     return (
         <Select onValueChange={handleValueChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="max-w-[180px]">
                 <SelectValue placeholder={title} />
             </SelectTrigger>
             <SelectContent>

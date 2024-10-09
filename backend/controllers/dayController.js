@@ -1,5 +1,6 @@
 const Day = require('../models/dayModel');
 const Task = require('../models/taskModel');
+const Tag = require('../models/tagModel');
 const Chunk = require('../models/chunkModel');
 
 const createDay = async (req, res) => {
@@ -9,6 +10,22 @@ const createDay = async (req, res) => {
             startOfDay: new Date(),
             ...req.body
         })
+
+        try{
+            const routineTag = await Tag.findOne({name:'routine'})
+            if (!routineTag) {
+                return res.status(404).json({ error: 'Routine tag not found.' });
+            }
+            const updatedRoutines = await Task.updateMany(
+                { tags: { $in: [routineTag._id] } },
+                { $set: { status: 'pending' } }
+            );
+            
+            console.log("Refreshed routine tasks", routines);
+        } catch (err2) {
+            console.log("Error refreshing routines", err2)
+        }
+        
         console.log("Day created !!")
         res.status(200).json(newDay)
     } catch (err) {

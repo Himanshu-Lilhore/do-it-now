@@ -8,7 +8,7 @@ const TagSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ['productive', 'semi-productive', 'unproductive'],
+        enum: ['routine', 'productive', 'semi-productive', 'unproductive'],
         required: true
     },
     color: {

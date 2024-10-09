@@ -59,7 +59,8 @@ interface Props {
     fetchTasks: () => void,
     fetchToday: () => void,
     allTasks: Task[],
-    tags: Tag[]
+    tags: Tag[],
+    list: string
 }
 interface Tag {
     name: string,
@@ -73,7 +74,7 @@ import CloseIcon from "@/assets/CloseIcon"
 import { Checkbox } from "@/components/ui/checkbox"
 
 
-export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Props) {
+export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list }: Props) {
     const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
     const [myTask, setMyTask] = useState<Task>(task)
     const [subTasks, setSubTasks] = useState<Task[]>([])
@@ -276,6 +277,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags }: Pro
                                     superTaskID={task._id}
                                     allTasks={allTasks}
                                     tags={tags}
+                                    list={list}
                                     className="max-h-[30rem] overflow-y-scroll"
                                 />
                             </div>

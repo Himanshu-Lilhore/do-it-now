@@ -39,10 +39,11 @@ import InProgIcon from "@/assets/taskStatus/InProgIcon"
 import PendingIcon from "@/assets/taskStatus/PendingIcon"
 import DoneIcon from "@/assets/taskStatus/DoneIcon"
 import YoutubeIcon from "@/assets/YoutubeIcon"
+import TagSelect from "./ui/TagSelect"
 type TaskStatus = 'in-prog' | 'pending' | 'done';
 
 
-export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags, className }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[], className?: string }) {
+export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags, className, list }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[], className?: string, list: string }) {
     const [input, setInput] = useState<string>('')
     const [filteredOptions, setFilteredOptions] = useState(allTasks);
 
@@ -74,7 +75,8 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
         try {
             const response1 = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/task/create`, {
                 title: input,
-                status: 'pending'
+                status: 'pending',
+                list: list.toLowerCase()
             });
 
             if (response1.status === 200) {
@@ -109,6 +111,21 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
         }
     };
 
+    const handleTagging = async (taskId: string, tagId: string) => {
+        try {
+            const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+                tags: [tagId],
+                _id: taskId
+            })
+            if (response.status === 200) {
+                console.log('Task tagged successfully');
+                fetchTasks()
+                fetchToday()
+            }
+        } catch (err) {
+            console.error('Error tagging task :', err);
+        }
+    };
 
     const handleCheckboxChange = async (currStatus: string, id: string) => {
         try {
@@ -119,7 +136,6 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
             if (response.status === 200) {
                 console.log('Task updated successfully');
                 fetchTasks()
-                fetchToday()
             }
         } catch (err) {
             console.error('Error updating task :', err);
@@ -127,7 +143,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
     };
 
     return (
-        <div className={`flex flex-col gap-4 max-w-[32rem] ${superTaskID?className:''}`}>
+        <div className={`flex flex-col gap-4 max-w-[32rem] ${superTaskID ? className : ''}`}>
             {/* Table */}
             <div className="max-h-[33rem] overflow-scroll">
                 <Table>
@@ -143,38 +159,65 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                     <TableBody className="">
                         {tasks.sort((task1, task2) => {
                             let val1, val2
-                            if (task1.status === 'in-progress') val1 = 0;
-                            else if (task1.status === 'pending') val1 = 1;
-                            else val1 = 2;
-                            if (task2.status === 'in-progress') val2 = 0;
-                            else if (task2.status === 'pending') val2 = 1;
-                            else val2 = 2;
-                            return val1 - val2;
+                            if (task1.tags.length || task2.tags.length) {
+                                if (task1.tags.length === 0) val1 = 0;
+                                else val1 = 1;
+                                if (task2.tags.length === 0) val2 = 0;
+                                else val2 = 1;
+                                return val1 - val2;
+                            } else {
+                                if (task1.status === 'in-progress') val1 = 0;
+                                else if (task1.status === 'pending') val1 = 1;
+                                else val1 = 2;
+                                if (task2.status === 'in-progress') val2 = 0;
+                                else if (task2.status === 'pending') val2 = 1;
+                                else val2 = 2;
+                                return val1 - val2;
+                            }
                         }).map((task, index) => {
-                            return (
-                                <TableRow key={task._id}>
-                                    <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
-                                    <TableCell className={`${task.subTasks && task.subTasks.length ? 'underline underline-offset-4' : ''} font-medium max-w-64 whitespace-nowrap overflow-hidden text-ellipsis`}>
-                                        <div className="flex flex-row h-full items-center gap-3">
-                                            {(task.tags && tags.find(tag => tag._id === task.tags[0])?.name === 'youtube') && <div><YoutubeIcon /></div>}
-                                            <div className={`${task.status === 'done' ? 'line-through decoration-stone-700 decoration-2' : ''}`}>{task.title}</div>
-                                        </div>
-                                    </TableCell>
-                                    {!superTaskID &&
-                                        <TableCell>
-                                            <div className={`size-5 items-center`}>
-                                                {
-                                                    (task.subTasks && task.subTasks.length) ?
-                                                        <div className={`w-fit h-fit px-1 rounded-sm text-nowrap text-sm align-middle text-black font-black font-mono ${(task.subTasks && task.subTasks.length) && (task.status === 'pending') ? ' bg-yellow-500/90 ' : (task.status === 'in-progress' ? ' bg-lime-500 ' : 'bg-zinc-500')}`}>{`${task.subTasks.map(str => tasks.find(one => one._id === str)).filter(taskk => taskk?.status === 'done').length}/${task.subTasks.length}`}</div>
-                                                        :
-                                                        (task.status === 'pending') ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)
-                                                }
+                            if (list.toLowerCase() === 'all' || tags.find(tag => tag._id === task.tags[0])?.category === list.toLowerCase())
+                                return (
+                                    <TableRow key={task._id}>
+                                        <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
+
+                                        <TableCell className={`${task.subTasks && task.subTasks.length ? 'underline underline-offset-4' : ''} font-medium max-w-64 whitespace-nowrap overflow-hidden text-ellipsis`}>
+                                            <div className="flex flex-row h-full items-center gap-3">
+                                                {(task.tags && tags.find(tag => tag._id === task.tags[0])?.name === 'youtube') && <div><YoutubeIcon /></div>}
+                                                <div className={`${task.status === 'done' ? 'line-through decoration-stone-700 decoration-2' : ''}`}>{task.title}</div>
                                             </div>
-                                        </TableCell>}
-                                    {!superTaskID && <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>}
-                                    <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} /></TableCell>
-                                </TableRow>
-                            )
+                                        </TableCell>
+
+                                        {!superTaskID &&
+                                            <TableCell>
+                                                <div className={`size-5 items-center`}>
+                                                    {
+                                                        (task.subTasks && task.subTasks.length) ?
+                                                            <div className={`w-fit h-fit px-1 rounded-sm text-nowrap text-sm align-middle text-black font-black font-mono ${(task.subTasks && task.subTasks.length) && (task.status === 'pending') ? ' bg-yellow-500/90 ' : (task.status === 'in-progress' ? ' bg-lime-500 ' : 'bg-zinc-500')}`}>{`${task.subTasks.map(str => tasks.find(one => one._id === str)).filter(taskk => taskk?.status === 'done').length}/${task.subTasks.length}`}</div>
+                                                            :
+                                                            (task.status === 'pending') ? <PendingIcon /> : (task.status === 'done' ? <DoneIcon /> : <InProgIcon />)
+                                                    }
+                                                </div>
+                                            </TableCell>
+                                        }
+
+                                        {
+                                            list.toLowerCase() === 'all' ?
+                                                (<TableCell>
+                                                    {(task.tags.length > 0) ?
+                                                        <div className="w-fit max-w-20 overflow-hidden text-ellipsis text-black text-sm font-mono font-semibold py-1 px-2 rounded-full"
+                                                            style={{ backgroundColor: tags.find(tag => tag._id === task.tags[0])?.color }}>{(tags.find(tag => tag._id === task.tags[0])?.name)}</div>
+                                                        :
+                                                        <div>
+                                                            <TagSelect myTask={task} handleTagging={handleTagging} title='tag it' tags={tags} />
+                                                        </div>}
+                                                </TableCell>)
+                                                :
+                                                (!superTaskID && <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>)
+                                        }
+
+                                        <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} list={list} /></TableCell>
+                                    </TableRow>
+                                )
                         })}
                     </TableBody>
                 </Table>
@@ -203,7 +246,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                         {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase()) + input.length,)}
                                     </div>
                                 </div>
-                                <TaskEditor task={option} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} />
+                                <TaskEditor task={option} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} list={list} />
                             </div>
                         ))}
                     </div>

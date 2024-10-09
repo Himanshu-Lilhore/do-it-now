@@ -5,7 +5,6 @@ const axios = require('axios');
 
 const createTask = async (req, res) => {
     try {
-        console.log(req.body)
         let { title, status } = req.body;
         const url = title;
         let description = '';
@@ -38,11 +37,18 @@ const createTask = async (req, res) => {
                 if (youtubeTag) {
                     tags.push(youtubeTag._id);
                 }
+
             } else {
                 console.error("YouTube video details not found.");
                 return res.status(400).json({ error: 'Unable to fetch YouTube video details.' });
             }
         }
+
+        const allTags = await Tag.find({})
+        if (req.body.list === 'productive') tags.push(allTags.find(tag => tag.name === 'work')._id)
+        else if (req.body.list === 'routine') tags.push(allTags.find(tag => tag.name === 'routine')._id)
+        else if (req.body.list === 'semi-productive') tags.push(allTags.find(tag => tag.name === 'planning')._id)
+        else if (req.body.list === 'unproductive') tags.push(allTags.find(tag => tag.name === 'undefined')._id)
 
         let stats = await Stat.findOne({})
 
@@ -76,7 +82,6 @@ const updateTask = async (req, res) => {
         const taskId = req.body._id
         console.log(taskId)
         const myTask = await Task.findOne({ _id: taskId })
-        console.log(`repeat : ${myTask.repeat}, prevStatus : ${myTask.status}, newStatus : ${req.body.status}`)
         if (myTask.repeat && myTask.status !== 'done' && req.body.status === 'done') {
             console.log("creating new (repeat) task...")
             try {
@@ -233,6 +238,12 @@ const createTaskInternal = async (taskData) => {
                 throw new Error('Unable to fetch YouTube video details.');
             }
         }
+
+        const allTags = await Tag.find({})
+        if (req.body.list === 'productive') tags.push(allTags.find(tag => tag.name === 'work')._id)
+        else if (req.body.list === 'routine') tags.push(allTags.find(tag => tag.name === 'routine')._id)
+        else if (req.body.list === 'semi-productive') tags.push(allTags.find(tag => tag.name === 'planning')._id)
+        else if (req.body.list === 'unproductive') tags.push(allTags.find(tag => tag.name === 'undefined')._id)
 
         let stats = await Stat.findOne({});
         stats.totalTasks++;
