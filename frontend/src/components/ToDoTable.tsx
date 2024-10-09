@@ -159,21 +159,24 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                     <TableBody className="">
                         {tasks.sort((task1, task2) => {
                             let val1, val2
-                            if (task1.tags.length || task2.tags.length) {
-                                if (task1.tags.length === 0) val1 = 0;
-                                else val1 = 1;
-                                if (task2.tags.length === 0) val2 = 0;
-                                else val2 = 1;
-                                return val1 - val2;
-                            } else {
-                                if (task1.status === 'in-progress') val1 = 0;
-                                else if (task1.status === 'pending') val1 = 1;
-                                else val1 = 2;
-                                if (task2.status === 'in-progress') val2 = 0;
-                                else if (task2.status === 'pending') val2 = 1;
-                                else val2 = 2;
-                                return val1 - val2;
+                            val1 = task1.tags.length === 0 ? 0 : 1;
+                            val2 = task2.tags.length === 0 ? 0 : 1;
+
+                            // 2. If both tasks have the same tag priority, check status.
+                            if (val1 === val2) {
+                                // Define the status priority mapping with `string` as the key type.
+                                const statusPriority: { [key: string]: number } = {
+                                    'in-progress': 0,
+                                    'pending': 1,
+                                    'done': 2,
+                                };
+
+                                // Safe lookup, defaults to 3 for any unknown status.
+                                val1 = statusPriority[task1.status] ?? 3;
+                                val2 = statusPriority[task2.status] ?? 3;
                             }
+
+                            return val1 - val2;
                         }).map((task, index) => {
                             if (list.toLowerCase() === 'all' || tags.find(tag => tag._id === task.tags[0])?.category === list.toLowerCase())
                                 return (

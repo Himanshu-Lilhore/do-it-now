@@ -508,7 +508,7 @@ export default function Home() {
 								{/* Day config  */}
 								<Dialog>
 									<DialogTrigger>
-										<div className='border px-3 py-2 rounded-md hover:bg-gray-400/40'>Config day</div>
+										<div className='border px-3 py-1 rounded-md hover:bg-gray-400/40'>Config day</div>
 									</DialogTrigger>
 									<DialogContent>
 										<DialogHeader>
