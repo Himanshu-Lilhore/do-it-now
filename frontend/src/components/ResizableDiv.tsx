@@ -22,6 +22,7 @@ import {
 import EditIcon from '@/assets/EditIcon';
 import { Button } from './ui/button';
 import AddIcon from '@/assets/AddIcon';
+import { Input } from './ui/input';
 Axios.defaults.withCredentials = true
 
 interface Task {
@@ -70,6 +71,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
     const dragOffset = useRef<number>(0);  // To store the initial offset when dragging
     let myTimer = setTimeout(() => { return }, 1000000000);
     const [isDeleted, setIsDeleted] = useState<boolean>(false)
+    const [input, setInput] = useState<string>('')
 
     useEffect(() => {
         heightRef.current = height;
@@ -78,6 +80,11 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
     useEffect(() => {
         topRef.current = top;
     }, [top]);
+
+
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setInput(e.target.value);
+    }
 
 
     // Color - theme
@@ -305,7 +312,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                                                             </TableRow>
                                                         </TableHeader>
                                                         <TableBody className="">
-                                                            {tasks && tasks.filter(task => !thisChunk.tasks.some(item => item._id.toString() === task._id.toString())).map((task, index) => {
+                                                            {tasks && tasks.filter(subTask => subTask.title.includes(input)).filter(task => !thisChunk.tasks.some(item => item._id.toString() === task._id.toString())).map((task, index) => {
                                                                 if (task.status !== 'done') {
                                                                     return (
                                                                         <TableRow key={task._id}>
@@ -319,6 +326,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                                                         </TableBody>
                                                     </Table>
                                                 </div>
+                                                <Input className='' onChange={handleInputChange} value={input} type="search" placeholder="Search here ..." />
                                             </DialogContent>
 
                                         </Dialog>
