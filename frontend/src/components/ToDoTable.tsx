@@ -40,6 +40,7 @@ import PendingIcon from "@/assets/taskStatus/PendingIcon"
 import DoneIcon from "@/assets/taskStatus/DoneIcon"
 import YoutubeIcon from "@/assets/YoutubeIcon"
 import TagSelect from "./ui/TagSelect"
+import CloseIcon from "@/assets/CloseIcon"
 type TaskStatus = 'in-prog' | 'pending' | 'done';
 
 
@@ -142,6 +143,23 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
         }
     };
 
+    const handleDetach = async (curTask: Task) => {
+        try {
+            const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+                _id: superTaskID,
+                subTasks: tasks.filter(val => val._id !== curTask._id)
+            })
+            if (response.status === 200) {
+                console.log('Sub-task detached successfully');
+                fetchTasks()
+            }
+        } catch (err) {
+            console.error('Error detaching sub-task :', err);
+        }
+    };
+
+
+
     return (
         <div className={`flex flex-col gap-4 max-w-[32rem] ${superTaskID ? className : ''}`}>
             {/* Table */}
@@ -154,6 +172,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                             {!superTaskID && <TableHead>Status</TableHead>}
                             {!superTaskID && <TableHead>Deadline</TableHead>}
                             {!superTaskID && <TableHead></TableHead>}
+                            {superTaskID && <TableHead></TableHead>}
                         </TableRow>
                     </TableHeader>
                     <TableBody className="">
@@ -177,10 +196,10 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                             }
 
                             return val1 - val2;
-                        }).map((task, index) => {
+                        }).map((task) => {
                             if (list.toLowerCase() === 'all' || tags.find(tag => tag._id === task.tags[0])?.category === list.toLowerCase() || superTaskID)
                                 return (
-                                    <TableRow key={task._id}>
+                                    <TableRow key={task._id} className="">
                                         <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
 
                                         <TableCell className={`${task.subTasks && task.subTasks.length ? 'underline underline-offset-4' : ''} font-medium max-w-64 whitespace-nowrap overflow-hidden text-ellipsis`}>
@@ -219,6 +238,16 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                         }
 
                                         <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} list={list} /></TableCell>
+
+                                        {
+                                            superTaskID &&
+                                            <TableCell className="text-red-600/80">
+                                                <div className='w-fit' onClick={() => handleDetach(task)}>
+                                                    <CloseIcon />
+                                                </div>
+                                            </TableCell>
+                                        }
+
                                     </TableRow>
                                 )
                         })}

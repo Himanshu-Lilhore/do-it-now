@@ -86,7 +86,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
 
     useEffect(() => {
         setMyTask(task)
-        if (task.subTasks && task.subTasks.length)
+        if (task.subTasks)
             setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is Task => task !== undefined))
     }, [task])
 
