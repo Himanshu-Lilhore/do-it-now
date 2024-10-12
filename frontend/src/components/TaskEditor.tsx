@@ -82,6 +82,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
     const [vidURL, setVidURL] = useState<string>()
     const [channel, setChannel] = useState<string>()
     const [del, setDel] = useState(false)
+    const [input, setInput] = useState<string>('')
     const { toast } = useToast()
 
     useEffect(() => {
@@ -95,6 +96,9 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
         getVidDetails()
     }, [])
 
+    function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+        setInput(e.target.value);
+    }
 
     function handleTitle(e: React.ChangeEvent<HTMLTextAreaElement>) {
         setMyTask(prev => ({
@@ -330,7 +334,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader>
-                                    <DialogTitle>Tasks</DialogTitle>
+                                    <DialogTitle>Add subtasks</DialogTitle>
                                 </DialogHeader>
                                 <div className='max-h-[24rem] overflow-scroll'>
                                     <Table>
@@ -342,7 +346,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody className="">
-                                            {allTasks.filter(subTask => !task.subTasks?.find(thisStr => thisStr === subTask._id)).map((subTask, index) => {
+                                            {allTasks.filter(subTask => subTask.title.includes(input)).filter(subTask => !task.subTasks?.find(thisStr => thisStr === subTask._id)).map((subTask, index) => {
                                                 if (subTask._id !== task._id)
                                                     return (
                                                         <TableRow key={subTask._id}>
@@ -355,6 +359,9 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                                         </TableBody>
                                     </Table>
                                 </div>
+
+                                {/* Search bar  */}
+                                <Input className='' onChange={handleInputChange} value={input} type="search" placeholder="Search here ..." />
                             </DialogContent>
                         </Dialog>
                     </div>
