@@ -312,7 +312,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                                                             </TableRow>
                                                         </TableHeader>
                                                         <TableBody className="">
-                                                            {tasks && tasks.filter(subTask => subTask.title.includes(input)).filter(task => !thisChunk.tasks.some(item => item._id.toString() === task._id.toString())).map((task, index) => {
+                                                            {tasks && tasks.filter(subTask => (subTask.title.toLowerCase()).includes(input)).filter(task => !thisChunk.tasks.some(item => item._id.toString() === task._id.toString())).map((task, index) => {
                                                                 if (task.status !== 'done') {
                                                                     return (
                                                                         <TableRow key={task._id}>
