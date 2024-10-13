@@ -245,6 +245,40 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
         return `${datePart} - ${timePart}`;
     }
 
+    const createTask = async () => {
+        if (!input) return;
+        console.log('Creating task...');
+
+        try {
+            const response1 = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/task/create`, {
+                title: input,
+                status: 'pending',
+                list: list.toLowerCase()
+            });
+
+            if (response1.status === 200) {
+                console.log('Task created successfully');
+                setInput('');
+
+                    try {
+                        const response2 = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+                            _id: task._id,
+                            subTasks: [...(task.subTasks || []), response1.data._id]
+                        });
+                        if (response2.status === 200) {
+                            console.log('Subtask ID added successfully');
+                        }
+                    } catch (err) {
+                        console.error('Error adding subtask ID :', err);
+                    }
+
+                fetchTasks();
+            }
+        } catch (err) {
+            console.error('Error creating task:', err);
+        }
+    };
+
 
     return (
         <Sheet>
@@ -346,7 +380,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody className="">
-                                            {allTasks.filter(subTask => subTask.title.includes(input)).filter(subTask => !task.subTasks?.find(thisStr => thisStr === subTask._id)).map((subTask, index) => {
+                                            {allTasks.filter(subTask => (subTask.title.toLowerCase()).includes(input.toLowerCase())).filter(subTask => !task.subTasks?.find(thisStr => thisStr === subTask._id)).map((subTask, index) => {
                                                 if (subTask._id !== task._id)
                                                     return (
                                                         <TableRow key={subTask._id}>
@@ -361,7 +395,10 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                                 </div>
 
                                 {/* Search bar  */}
-                                <Input className='' onChange={handleInputChange} value={input} type="search" placeholder="Search here ..." />
+                                <div className='flex flex-row gap-4 p-4'>
+                                    <Input className='' onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="Search here ..." />
+                                    <Button type="submit" onClick={createTask}>Create</Button>
+                                </div>
                             </DialogContent>
                         </Dialog>
                     </div>
