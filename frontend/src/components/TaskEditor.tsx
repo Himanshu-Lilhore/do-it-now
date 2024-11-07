@@ -8,6 +8,7 @@ import { Calendar } from "@/components/ui/calendar"
 import Axios from 'axios'
 import { useToast } from "@/hooks/use-toast"
 Axios.defaults.withCredentials = true
+import { Link } from 'react-router-dom';
 import {
     Dialog,
     DialogContent,
@@ -84,6 +85,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
     const [del, setDel] = useState(false)
     const [input, setInput] = useState<string>('')
     const { toast } = useToast()
+    const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
 
     useEffect(() => {
         setMyTask(task)
@@ -293,8 +295,8 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
             <SheetContent className="overflow-auto">
                 <SheetHeader>
                     <SheetTitle className="font-bold flex flex-row">
-                        <div>EDIT TASK</div>
-                        <div className="whitespace-pre opacity-25">{` #${myTask.taskNum}`}</div>
+                        <div className="whitespace-pre opacity-25">{`#${myTask.taskNum} `}</div>
+                        {myTask.title.match(regex) && <a href={(myTask.title.match(regex) || [''])[0]} target='_blank'>🔗</a>}
                     </SheetTitle>
                     <SheetDescription></SheetDescription>
                 </SheetHeader>
