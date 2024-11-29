@@ -486,7 +486,7 @@ export default function Home() {
 
 
 
-			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex 2xl:flex-row flex-col-reverse'>
+			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'>
 				{/* 4am  */}
 				<div className='z-50 p-6 overflow-hidden h-screen'>
 					<iframe className='h-full w-96 rounded-lg'
@@ -567,7 +567,7 @@ export default function Home() {
 
 						{/* to-do  */}
 						<div>
-							<ToDoTable tasks={tasks} fetchTasks={fetchTasks} fetchToday={fetchToday} allTasks={tasks} tags={tags} list={list}/>
+							<ToDoTable tasks={tasks} setTasks={setTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} allTasks={tasks} tags={tags} list={list}/>
 						</div>
 					</div>
 				</div>

@@ -161,7 +161,7 @@ const deleteTask = async (req, res) => {
             { $pull: { subTasks: req.body._id } }
         );
 
-        res.status(200).json("Task deleted and references removed!");
+        res.status(200).json({_id: req.body._id});
     } catch (err) {
         console.log("Error deleting the task")
         res.status(400).json({ error: err.message })

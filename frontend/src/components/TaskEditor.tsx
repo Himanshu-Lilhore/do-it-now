@@ -57,6 +57,7 @@ interface Task {
 }
 interface Props {
     task: Task,
+    setTasks: any,
     fetchTasks: () => void,
     fetchToday: () => void,
     allTasks: Task[],
@@ -73,9 +74,10 @@ import { Progress } from "@/components/ui/progress"
 import TagSelect from "./ui/TagSelect"
 import CloseIcon from "@/assets/CloseIcon"
 import { Checkbox } from "@/components/ui/checkbox"
+import OpenIcon from "@/assets/OpenIcon"
 
 
-export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list }: Props) {
+export function TaskEditor({ task, setTasks, fetchTasks, fetchToday, allTasks, tags, list }: Props) {
     const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
     const [myTask, setMyTask] = useState<Task>(task)
     const [subTasks, setSubTasks] = useState<Task[]>([])
@@ -136,8 +138,14 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
             )
             if (response.status === 200) {
                 console.log(`Task updated successfully : ${response.data.title}`);
-                fetchTasks()
-                fetchToday()
+                // fetchTasks()
+                // fetchToday()
+                setTasks((prev: any[]) => {
+                    return [
+                        ...prev.filter((task) => task._id !== response.data._id),
+                        response.data,
+                    ];
+                });
             }
         } catch (err) {
             console.error('Error updating task :', err);
@@ -158,8 +166,13 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                     description: myTask.title,
                     variant: "destructive"
                 })
-                fetchTasks()
-                fetchToday()
+                // fetchTasks()
+                // fetchToday()
+                setTasks((prev: any[]) => {
+                    return [
+                        ...prev.filter((task) => task._id !== response.data._id)
+                    ];
+                });
             }
         } catch (err) {
             console.error('Error deleting task :', err);
@@ -174,8 +187,14 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
             })
             if (response.status === 200) {
                 console.log(`Subtask added successfully : ${response.data}`);
-                fetchTasks()
-                fetchToday()
+                // fetchTasks()
+                // fetchToday()
+                setTasks((prev: any[]) => {
+                    return [
+                        ...prev.filter((task) => task._id !== response.data._id),
+                        response.data,
+                    ];
+                });
             }
         } catch (err) {
             console.error('Error adding subtask :', err);
@@ -262,19 +281,31 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                 console.log('Task created successfully');
                 setInput('');
 
-                    try {
-                        const response2 = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
-                            _id: task._id,
-                            subTasks: [...(task.subTasks || []), response1.data._id]
+                try {
+                    const response2 = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
+                        _id: task._id,
+                        subTasks: [...(task.subTasks || []), response1.data._id]
+                    });
+                    if (response2.status === 200) {
+                        setTasks((prev: any[]) => {
+                            return [
+                                ...prev.filter((task) => task._id !== response2.data._id),
+                                response2.data,
+                            ];
                         });
-                        if (response2.status === 200) {
-                            console.log('Subtask ID added successfully');
-                        }
-                    } catch (err) {
-                        console.error('Error adding subtask ID :', err);
+                        console.log('Subtask ID added successfully');
                     }
+                } catch (err) {
+                    console.error('Error adding subtask ID :', err);
+                }
 
-                fetchTasks();
+                // fetchTasks();
+                setTasks((prev: any[]) => {
+                    return [
+                        ...prev,
+                        response1.data,
+                    ];
+                });
             }
         } catch (err) {
             console.error('Error creating task:', err);
@@ -312,6 +343,7 @@ export function TaskEditor({ task, fetchTasks, fetchToday, allTasks, tags, list 
                             <div className="flex flex-col border rounded-lg p-3 my-1">
                                 <ToDoTable
                                     tasks={subTasks}
+                                    setTasks={setTasks}
                                     fetchTasks={fetchTasks}
                                     fetchToday={fetchToday}
                                     superTaskID={task._id}

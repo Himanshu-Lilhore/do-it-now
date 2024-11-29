@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { TaskEditor } from "./TaskEditor"
 import { useState, useEffect, useRef } from 'react'
-import Axios from 'axios';
+import Axios, { all } from 'axios';
 Axios.defaults.withCredentials = true
 
 
@@ -41,12 +41,15 @@ import DoneIcon from "@/assets/taskStatus/DoneIcon"
 import YoutubeIcon from "@/assets/YoutubeIcon"
 import TagSelect from "./ui/TagSelect"
 import CloseIcon from "@/assets/CloseIcon"
+import OpenIcon from "@/assets/OpenIcon"
 type TaskStatus = 'in-prog' | 'pending' | 'done';
 
 
-export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, allTasks, tags, className, list }: { tasks: Task[], fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[], className?: string, list: string }) {
+export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, superTaskID, allTasks, tags, className, list }: { tasks: Task[], setTasks: any, fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[], className?: string, list: string }) {
     const [input, setInput] = useState<string>('')
-    const [filteredOptions, setFilteredOptions] = useState(allTasks);
+    const [tempInput, setTempInput] = useState<string>('')
+    const [filteredOptions, setFilteredOptions] = useState<Task[]>(allTasks);
+    const filterTimer = useRef<any>(setTimeout(() => {},10));
 
     useEffect(() => {
         fetchTasks()
@@ -56,17 +59,30 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
         setFilteredOptions(allTasks);
     }, [allTasks])
 
-    useEffect(() => {
+    const filterFuction = (str:string) => {
         const filtered = allTasks.filter(task => {
-            return task.title.toLowerCase().includes(input.toLowerCase())
+            return task.title.toLowerCase().includes(str.toLowerCase())
         }
         );
-        setFilteredOptions(filtered);
-    }, [input, allTasks])
+        return filtered;
+    }
 
-
+    useEffect(() => {
+        console.log('input val changed.')
+        filterFuction('');
+    }, [allTasks])
+    
+    
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-        setInput(e.target.value);
+        const str = e.target.value
+        setTempInput(str);
+        
+        clearTimeout(filterTimer.current)
+        const val = filterFuction(str)
+        filterTimer.current = setTimeout(() => {
+            setFilteredOptions(val);
+            setInput(e.target.value);
+        }, 300)
     }
 
     const createTask = async () => {
@@ -82,7 +98,7 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
 
             if (response1.status === 200) {
                 console.log('Task created successfully');
-                setInput('');
+                setTempInput('');
 
                 if (superTaskID) {
                     try {
@@ -105,7 +121,11 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                     }
                 }
 
-                fetchTasks();
+                // fetchTasks();
+                setTasks((prev: any) => {
+                    prev.push(response1.data);
+                    return prev;
+                })
             }
         } catch (err) {
             console.error('Error creating task:', err);
@@ -120,8 +140,15 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
             })
             if (response.status === 200) {
                 console.log('Task tagged successfully');
-                fetchTasks()
+                // fetchTasks()
+                setTasks((prev: any[]) => {
+                    return [
+                        ...prev.filter((task) => task._id !== response.data._id),
+                        response.data,
+                    ];
+                });
                 fetchToday()
+
             }
         } catch (err) {
             console.error('Error tagging task :', err);
@@ -136,7 +163,13 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
             })
             if (response.status === 200) {
                 console.log('Task updated successfully');
-                fetchTasks()
+                // fetchTasks()
+                setTasks((prev: any[]) => {
+                    return [
+                        ...prev.filter((task) => task._id !== response.data._id),
+                        response.data,
+                    ];
+                });
             }
         } catch (err) {
             console.error('Error updating task :', err);
@@ -151,7 +184,13 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
             })
             if (response.status === 200) {
                 console.log('Sub-task detached successfully');
-                fetchTasks()
+                // fetchTasks()
+                setTasks((prev: any[]) => {
+                    return [
+                        ...prev.filter((task) => task._id !== response.data._id),
+                        response.data,
+                    ];
+                });
             }
         } catch (err) {
             console.error('Error detaching sub-task :', err);
@@ -237,7 +276,12 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                                 (!superTaskID && <TableCell>{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>)
                                         }
 
-                                        <TableCell><TaskEditor task={task} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} list={list} /></TableCell>
+                                        <TableCell>
+                                            {tempInput !== input ?
+                                                <OpenIcon /> :
+                                                <TaskEditor task={task} setTasks={setTasks} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} list={list} />
+                                            }
+                                        </TableCell>
 
                                         {
                                             superTaskID &&
@@ -269,22 +313,26 @@ export default function ToDoTable({ tasks, fetchTasks, fetchToday, superTaskID, 
                                 <div className={`flex flex-row whitespace-pre text-ellipsis overflow-hidden ${option.status === 'done' ? 'line-through decoration-red-700 decoration-2' : ''}`}>
                                     {(option.tags && tags.find(tag => tag._id === option.tags[0])?.name === 'youtube') && <div className="pr-2"><YoutubeIcon /></div>}
                                     <div>
-                                        {option.title.slice(0, option.title.toLowerCase().indexOf(input.toLowerCase()))}
+                                        {option.title.slice(0, option.title.toLowerCase().indexOf(tempInput.toLowerCase()))}
                                     </div>
                                     <div className="text-amber-400">
-                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase()), option.title.toLowerCase().indexOf(input.toLowerCase()) + input.length)}
+                                        {option.title.slice(option.title.toLowerCase().indexOf(tempInput.toLowerCase()), option.title.toLowerCase().indexOf(tempInput.toLowerCase()) + tempInput.length)}
                                     </div>
                                     <div>
-                                        {option.title.slice(option.title.toLowerCase().indexOf(input.toLowerCase()) + input.length,)}
+                                        {option.title.slice(option.title.toLowerCase().indexOf(tempInput.toLowerCase()) + tempInput.length,)}
                                     </div>
                                 </div>
-                                <TaskEditor task={option} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} list={list} />
+                                {tempInput !== input ?
+                                    <OpenIcon /> :
+                                    <TaskEditor task={option} setTasks={setTasks} allTasks={allTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} tags={tags} list={list} />
+                                }
                             </div>
                         ))}
                     </div>
                 )}
                 <div className='flex flex-row gap-4 p-4'>
-                    <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="Add more..." />
+                    <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={tempInput} type="search" placeholder="Add more..." />
+                    {/* <Input onChange={handleInputChange} onKeyDown={(e) => e.key === 'Enter' && createTask()} value={input} type="search" placeholder="Add more..." /> */}
                     <Button type="submit" onClick={createTask}>Create</Button>
                 </div>
             </div>

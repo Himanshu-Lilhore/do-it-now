@@ -220,7 +220,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                 }
             );
             if (response.status === 200) {
-                fetchTasks();
+                // fetchTasks();
                 fetchToday();
                 console.log('A task added to the chunk');
             }
@@ -241,7 +241,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                 }
             );
             if (response.status === 200) {
-                fetchTasks();
+                // fetchTasks();
                 fetchToday();
                 console.log('A task detached from the chunk');
             }
