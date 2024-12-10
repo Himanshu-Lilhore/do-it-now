@@ -13,28 +13,6 @@ import {
 import { TaskEditor } from "./TaskEditor"
 import { useState, useEffect, useRef } from 'react'
 import Axios, { all } from 'axios';
-Axios.defaults.withCredentials = true
-
-
-interface Task {
-    _id: string,
-    title: string,
-    description: string,
-    deadline: Date,
-    status: string,
-    tags: string[],
-    subTasks: string[],
-    createdAt: string,
-    updatedAt: string,
-    taskNum: number,
-    repeat: boolean
-}
-interface Tag {
-    name: string,
-    category: string,
-    color: string,
-    _id: string
-}
 import InProgIcon from "@/assets/taskStatus/InProgIcon"
 import PendingIcon from "@/assets/taskStatus/PendingIcon"
 import DoneIcon from "@/assets/taskStatus/DoneIcon"
@@ -42,13 +20,15 @@ import YoutubeIcon from "@/assets/YoutubeIcon"
 import TagSelect from "./ui/TagSelect"
 import CloseIcon from "@/assets/CloseIcon"
 import OpenIcon from "@/assets/OpenIcon"
+import * as type from "../types/index";
+Axios.defaults.withCredentials = true
 type TaskStatus = 'in-prog' | 'pending' | 'done';
 
 
-export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, superTaskID, allTasks, tags, className, list }: { tasks: Task[], setTasks: any, fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: Task[], tags: Tag[], className?: string, list: string }) {
+export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, superTaskID, allTasks, tags, className, list }: { tasks: type.Task[], setTasks: any, fetchTasks: () => void, fetchToday: () => void, superTaskID?: string, allTasks: type.Task[], tags: type.Tag[], className?: string, list: string }) {
     const [input, setInput] = useState<string>('')
     const [tempInput, setTempInput] = useState<string>('')
-    const [filteredOptions, setFilteredOptions] = useState<Task[]>(allTasks);
+    const [filteredOptions, setFilteredOptions] = useState<type.Task[]>(allTasks);
     const filterTimer = useRef<any>(setTimeout(() => {},10));
 
     useEffect(() => {
@@ -176,7 +156,7 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
         }
     };
 
-    const handleDetach = async (curTask: Task) => {
+    const handleDetach = async (curTask: type.Task) => {
         try {
             const response = await Axios.put(`${import.meta.env.VITE_BACKEND_URL}/task/update`, {
                 _id: superTaskID,

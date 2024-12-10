@@ -20,44 +20,27 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import EditIcon from '@/assets/EditIcon';
-import { Button } from './ui/button';
 import AddIcon from '@/assets/AddIcon';
 import { Input } from './ui/input';
+import * as type from "../types/index";
+
 Axios.defaults.withCredentials = true
 
-interface Task {
-    _id: string,
-    title: string,
-    description: string,
-    deadline: Date,
-    status: string,
-    tags: string[],
-	createdAt: string,
-	updatedAt: string,
-	taskNum: number,
-	repeat: boolean
-}
 interface ResizableDivProps {
     thisChunk: {
         title: string,
         _id: string;
         startTime: string;
         duration: number;
-        tasks: Task[];
+        tasks: type.Task[];
     };
     hourHeight: number;
     getChunkDepth: (startTime: string) => number;
     deleteChunk: (chunkId: string) => void;
     fetchToday: () => void;
-    tasks: Task[];
+    tasks: type.Task[];
     fetchTasks: () => void;
-    tags: Tag[]
-}
-interface Tag {
-    name: string,
-    category: string,
-    color: string,
-    _id: string
+    tags: type.Tag[]
 }
 
 export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, deleteChunk, fetchToday, tasks, fetchTasks, tags }: ResizableDivProps) {

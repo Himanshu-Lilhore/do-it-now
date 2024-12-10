@@ -7,8 +7,6 @@ import { useState, useEffect } from 'react'
 import { Calendar } from "@/components/ui/calendar"
 import Axios from 'axios'
 import { useToast } from "@/hooks/use-toast"
-Axios.defaults.withCredentials = true
-import { Link } from 'react-router-dom';
 import {
     Dialog,
     DialogContent,
@@ -42,25 +40,15 @@ import DoneIcon from "@/assets/taskStatus/DoneIcon"
 import InProgIcon from "@/assets/taskStatus/InProgIcon"
 import ToDoTable from "./ToDoTable"
 import AddIcon from "@/assets/AddIcon"
-interface Task {
-    _id: string,
-    title: string,
-    description: string,
-    deadline: Date,
-    status: string,
-    tags: string[],
-    subTasks: string[],
-    createdAt: string,
-    updatedAt: string,
-    taskNum: number,
-    repeat: boolean
-}
+import * as type from "../types/index";
+Axios.defaults.withCredentials = true
+
 interface Props {
-    task: Task,
+    task: type.Task,
     setTasks: any,
     fetchTasks: () => void,
     fetchToday: () => void,
-    allTasks: Task[],
+    allTasks: type.Task[],
     tags: Tag[],
     list: string
 }
@@ -74,13 +62,12 @@ import { Progress } from "@/components/ui/progress"
 import TagSelect from "./ui/TagSelect"
 import CloseIcon from "@/assets/CloseIcon"
 import { Checkbox } from "@/components/ui/checkbox"
-import OpenIcon from "@/assets/OpenIcon"
 
 
 export function TaskEditor({ task, setTasks, fetchTasks, fetchToday, allTasks, tags, list }: Props) {
     const [calDate, setCalDate] = useState<Date | undefined>(new Date(task.deadline))
-    const [myTask, setMyTask] = useState<Task>(task)
-    const [subTasks, setSubTasks] = useState<Task[]>([])
+    const [myTask, setMyTask] = useState<type.Task>(task)
+    const [subTasks, setSubTasks] = useState<type.Task[]>([])
     const [thumbnailURL, setThumbnailURL] = useState()
     const [vidURL, setVidURL] = useState<string>()
     const [channel, setChannel] = useState<string>()
@@ -92,7 +79,7 @@ export function TaskEditor({ task, setTasks, fetchTasks, fetchToday, allTasks, t
     useEffect(() => {
         setMyTask(task)
         if (task.subTasks)
-            setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is Task => task !== undefined))
+            setSubTasks((task.subTasks.map(eachStr => allTasks.find(thisT => thisT._id === eachStr)) || []).filter((task): task is type.Task => task !== undefined))
     }, [task])
 
     useEffect(() => {

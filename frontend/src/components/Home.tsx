@@ -18,47 +18,16 @@ import {
 import { toast } from '@/hooks/use-toast';
 import CreateChunk from './CreateChunk';
 import ListSelect from './ListSelect';
+import Dice from './Dice';
+import * as type from "../types/index";
 
 Axios.defaults.withCredentials = true
-interface DayState {
-	_id?: string;
-	startOfDay: string;
-	chunks: Chunk[];
-	sleep: { start: Date | null; end: Date | null };
-	chunksRemaining: number | null;
-}
-interface Chunk {
-	title: string,
-	_id: string;
-	startTime: string;
-	duration: number;
-	rating: number;
-	tasks: Task[];
-}
-interface Task {
-	_id: string,
-	title: string,
-	description: string,
-	deadline: Date,
-	status: string,
-	tags: string[],
-	subTasks: string[],
-	createdAt: string,
-	updatedAt: string,
-	taskNum: number,
-	repeat: boolean
-}
-interface Tag {
-	name: string,
-	category: string,
-	color: string,
-	_id: string
-}
+
 
 export default function Home() {
 	const ref = useRef<HTMLDivElement>(null);
-	const [tags, setTags] = useState<Tag[]>([])
-	const [day, setDay] = useState<DayState>({ startOfDay: '01 Jan 1970 00:00:00 GMT', chunks: [], sleep: { start: null, end: null }, chunksRemaining: null })
+	const [tags, setTags] = useState<type.Tag[]>([])
+	const [day, setDay] = useState<type.Day>({ startOfDay: '01 Jan 1970 00:00:00 GMT', chunks: [], sleep: { start: null, end: null }, chunksRemaining: null })
 	const [currState, setCurrState] = useState({ state: null, today: null, workHrs: 16, sleepHrs: 8, yesterday: null })
 	const [now, setNow] = useState<number>(0)   // hourHeight * number of wake hrs passed
 	const hourHeight = 4  // rem
@@ -66,7 +35,7 @@ export default function Home() {
 	let startHr = new Date(Date.parse(day.startOfDay)).getHours()
 	const buttonRef = useRef<HTMLButtonElement>(null)
 	const [list, setList] = useState('All')
-	const [tasks, setTasks] = useState<Task[]>([
+	const [tasks, setTasks] = useState<type.Task[]>([
 		{
 			_id: 'default',
 			title: 'Default Task',
@@ -122,7 +91,6 @@ export default function Home() {
 
 		return `${timePart} | ${datePart}`;
 	}
-
 
 
 	useEffect(() => {
@@ -486,14 +454,21 @@ export default function Home() {
 
 
 
-			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'>
+			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex sm:flex-row flex-col-reverse'>
+			{/* <div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'> */}
+
 				{/* 4am  */}
-				<div className='z-50 p-6 overflow-hidden h-screen'>
+				{/* <div className='z-50 p-6 overflow-hidden h-screen'>
 					<iframe className='h-full w-96 rounded-lg'
 						src=
 						"https://himanshu-lilhore.github.io/4am/client/"
 						title="4am" >
 					</iframe>
+				</div> */}
+
+				{/* Dice */}
+				<div className='z-[100] p-6 overflow-hidden h-screen w-96 bg-black'>
+					<Dice tasks={tasks}/>
 				</div>
 
 				<div>
@@ -502,7 +477,7 @@ export default function Home() {
 					<div className='flex flex-col gap-8'>
 						<div className='flex flex-row justify-between'>
 							<div className=' '>
-								<ListSelect title={list} setList={setList}/>
+								<ListSelect title={list} setList={setList} />
 							</div>
 							<div className='flex items-center justify-end gap-4'>
 								{/* Day config  */}
@@ -567,7 +542,7 @@ export default function Home() {
 
 						{/* to-do  */}
 						<div>
-							<ToDoTable tasks={tasks} setTasks={setTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} allTasks={tasks} tags={tags} list={list}/>
+							<ToDoTable tasks={tasks} setTasks={setTasks} fetchTasks={fetchTasks} fetchToday={fetchToday} allTasks={tasks} tags={tags} list={list} />
 						</div>
 					</div>
 				</div>
