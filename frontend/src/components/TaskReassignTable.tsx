@@ -55,12 +55,10 @@ export default function TaskReassignTable({ tasks, setDiceStats }: { tasks: type
 
 
     return (
-        <div>
+        <>
             <Dialog>
                 <DialogTrigger>
-                    <div className='inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2'>
-                        <EditIcon />
-                    </div>
+                    <EditIcon />
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
@@ -82,9 +80,11 @@ export default function TaskReassignTable({ tasks, setDiceStats }: { tasks: type
                                                 <TableCell className="font-medium min-w-44">{task.title}</TableCell>
 
                                                 <DialogClose asChild>
-                                                    <TableCell onClick={() => swapTask(task._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'>
-                                                        <AddIcon />
-                                                    </div></TableCell>
+                                                    <TableCell onClick={() => swapTask(task._id)}>
+                                                        <div className='w-fit p-1 rounded-full border hover:border-gray-700'>
+                                                            <AddIcon />
+                                                        </div>
+                                                    </TableCell>
                                                 </DialogClose>
                                             </TableRow>
                                         )
@@ -96,7 +96,7 @@ export default function TaskReassignTable({ tasks, setDiceStats }: { tasks: type
                     <Input className='' onChange={handleInputChange} value={input} type="search" placeholder="Search here ..." />
                 </DialogContent>
             </Dialog>
-        </div >
+        </>
     );
 };
 
