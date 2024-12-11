@@ -99,7 +99,7 @@ const getRollStats = async (req, res) => {
 
 const updateRollStats = async (req, res) => {
     try {
-        let diceStats = await Dice.findOne({ _id: (await CurrState.findOne({})).diceId }).toObject()
+        let diceStats = (await Dice.findOne({ _id: (await CurrState.findOne({})).diceId })).toObject()
         
         diceStats = await Dice.findByIdAndUpdate(diceStats._id, { ...diceStats, ...req.body }, { new: true }).lean();
         res.status(200).json(diceStats)
