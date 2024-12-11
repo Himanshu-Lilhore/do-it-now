@@ -454,8 +454,8 @@ export default function Home() {
 
 
 
-			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex sm:flex-row flex-col-reverse'>
-				{/* <div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'> */}
+			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'>
+				{/* <div classsName='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'> */}
 
 				<div className='z-50 m-4 p-4 overflow-hidden flex flex-col border border-gray-600 rounded-lg shadow-lg hover:shadow-gray-700 shadow-gray-800'>
 					{/* Dice */}
