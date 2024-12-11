@@ -124,7 +124,7 @@ export function TaskEditor({ task, setTasks, fetchTasks, fetchToday, allTasks, t
                     { ...myTask }
             )
             if (response.status === 200) {
-                console.log(`Task updated successfully : ${response.data.title}`);
+                // console.log(`Task updated successfully : ${response.data.title}`);
                 // fetchTasks()
                 // fetchToday()
                 setTasks((prev: any[]) => {
@@ -147,7 +147,7 @@ export function TaskEditor({ task, setTasks, fetchTasks, fetchToday, allTasks, t
                 _id: myTask._id
             })
             if (response.status === 200) {
-                console.log(`Task deleted successfully : ${response.data}`);
+                // console.log(`Task deleted successfully : ${response.data}`);
                 toast({
                     title: "Task deleted 🗑️",
                     description: myTask.title,
@@ -173,7 +173,7 @@ export function TaskEditor({ task, setTasks, fetchTasks, fetchToday, allTasks, t
                 subTasks: [...(task.subTasks || []), subtaskID]
             })
             if (response.status === 200) {
-                console.log(`Subtask added successfully : ${response.data}`);
+                // console.log(`Subtask added successfully : ${response.data}`);
                 // fetchTasks()
                 // fetchToday()
                 setTasks((prev: any[]) => {

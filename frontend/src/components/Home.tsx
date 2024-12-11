@@ -52,7 +52,7 @@ export default function Home() {
 	]);
 
 	const fetchTags = async () => {
-		console.log('fetching tags ...')
+		// console.log('fetching tags ...')
 		try {
 			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/tag/read`, { withCredentials: true })
 			setTags(response.data)
@@ -62,10 +62,10 @@ export default function Home() {
 	}
 
 	const fetchTasks = async () => {
-		console.log('fetching tasks ...')
+		// console.log('fetching tasks ...')
 		try {
 			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/task/readMany`, { withCredentials: true })
-			console.log(`Tasks fetched successfully (${response.data.length})`);
+			// console.log(`Tasks fetched successfully (${response.data.length})`);
 			setTasks(response.data)
 		} catch (err) {
 			console.error('Error fetching tasks :', err);
@@ -100,7 +100,7 @@ export default function Home() {
 	}, [])
 
 	const fetchToday = async () => {
-		console.log('fetching today ...')
+		// console.log('fetching today ...')
 		if (currState.today) {
 			try {
 				const response = await Axios.post(`${import.meta.env.VITE_BACKEND_URL}/day/read`, {
@@ -114,12 +114,12 @@ export default function Home() {
 	}
 
 	useEffect(() => {
-		console.log(`State updated -
-			state: ${currState.state}
-			today : ${currState.today}
-			workHrs : ${currState.workHrs}
-			sleepHrs : ${currState.sleepHrs}
-			yesterday : ${currState.yesterday}`)
+		// console.log(`State updated -
+		// 	state: ${currState.state}
+		// 	today : ${currState.today}
+		// 	workHrs : ${currState.workHrs}
+		// 	sleepHrs : ${currState.sleepHrs}
+		// 	yesterday : ${currState.yesterday}`)
 		const updateDay = async () => {
 			fetchToday()
 		}
@@ -133,13 +133,13 @@ export default function Home() {
 
 		fetchTasks()
 
-		console.log(`Day updated -
-			startOfDay : ${day.startOfDay}
-			sleep : ${day.sleep.start} to ${day.sleep.end}
-			chunksRemaining : ${day.chunksRemaining}
-			chunks : ${day.chunks.map(val => {
-			return `start - ${val.startTime}, dur - ${val.duration}, rating - ${val.rating}, tasks - ${val.tasks}`
-		})}`)
+		// console.log(`Day updated -
+		// 	startOfDay : ${day.startOfDay}
+		// 	sleep : ${day.sleep.start} to ${day.sleep.end}
+		// 	chunksRemaining : ${day.chunksRemaining}
+		// 	chunks : ${day.chunks.map(val => {
+		// 	return `start - ${val.startTime}, dur - ${val.duration}, rating - ${val.rating}, tasks - ${val.tasks}`
+		// })}`)
 
 		clearInterval(myTimer)
 		setBar()
@@ -172,7 +172,7 @@ export default function Home() {
 
 
 	const fetchState = async () => {
-		console.log("Fetching state...")
+		// console.log("Fetching state...")
 		try {
 			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/state/read`);
 			if (response.status === 200) {
@@ -365,7 +365,7 @@ export default function Home() {
 				sleep: { ...day.sleep, end: newDate }
 			});
 			if (response.status === 200) {
-				console.log(`Sleep end set successfully : ${newDate}`);
+				// console.log(`Sleep end set successfully : ${newDate}`);
 				setDay(response.data)
 			}
 			else {
@@ -383,7 +383,7 @@ export default function Home() {
 				sleep: { ...day.sleep, start: newDate }
 			});
 			if (response.status === 200) {
-				console.log(`Sleep start set successfully : ${newDate}`);
+				// console.log(`Sleep start set successfully : ${newDate}`);
 				setDay(response.data)
 			}
 			else {

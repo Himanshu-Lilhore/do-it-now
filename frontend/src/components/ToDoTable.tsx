@@ -83,7 +83,7 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
                 if (superTaskID) {
                     try {
                         let superTask = allTasks.find(task => task._id.toString() === superTaskID);
-                        console.log("Super Task Before Update: ", superTaskID);
+                        // console.log("Super Task Before Update: ", superTaskID);
 
                         if (!superTask) {
                             console.error("Super Task not found in the list");

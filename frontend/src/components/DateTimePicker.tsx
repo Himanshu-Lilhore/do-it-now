@@ -25,7 +25,7 @@ export default function DateTimePicker({ title, date, setDate }: Props) {
     const [calDate, setCalDate] = useState<undefined | Date>(date)
 
     useEffect(() => {
-        console.log(`new Date : ${currDate}`)
+        // console.log(`new Date : ${currDate}`)
     }, [currDate])
 
     function handleSubmit() {

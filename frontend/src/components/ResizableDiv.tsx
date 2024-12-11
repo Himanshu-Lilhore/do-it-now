@@ -186,7 +186,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
 
 
     const handleDelete = useCallback(async (chunkId: string) => {
-        console.log(`deleting : ${chunkId}`)
+        // console.log(`deleting : ${chunkId}`)
         setIsDeleted(true);
         await deleteChunk(chunkId);
     }, [deleteChunk]);

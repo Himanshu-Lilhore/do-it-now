@@ -48,7 +48,7 @@ export default function TaskReassignTable({ tasks, diceStats, setDiceStatsProper
                 }
             );
             if (response.status === 200) {
-                console.log('Dice task swapped', response.data);
+                // console.log('Dice task swapped', response.data);
                 setDiceStatsProperly({ ...diceStats, ...response.data });
             }
         } catch (err) {
@@ -68,7 +68,7 @@ export default function TaskReassignTable({ tasks, diceStats, setDiceStatsProper
                     }
                 );
                 if (response.status === 200) {
-                    console.log('Dice cooldown updated', response.data);
+                    // console.log('Dice cooldown updated', response.data);
                     setDiceStatsProperly({ ...diceStats, ...response.data });
                 }
             } catch (err) {

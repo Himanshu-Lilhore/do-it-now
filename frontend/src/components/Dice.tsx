@@ -37,13 +37,13 @@ export default function Dice({ tasks }: { tasks: type.Task[] }) {
     
     
     useEffect(() => {
-        console.log(diceStats)//////////////
+        // console.log(diceStats)//////////////
         setTask(tasks.find((task) => task._id === diceStats.currTask));
     }, [tasks, diceStats]);
 
 
     useEffect(() => {
-        console.log(task)
+        // console.log(task)
     }, [task])
 
 
