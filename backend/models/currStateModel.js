@@ -23,6 +23,10 @@ const CurrStateSchema = new mongoose.Schema({
     sleepHrs: {
         type: Number,
         default: 8
+    },
+    diceId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dice',
     }
 }, {timestamps: true});
 

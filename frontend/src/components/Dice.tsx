@@ -14,7 +14,7 @@ Axios.defaults.withCredentials = true
 
 
 export default function Dice({ tasks }: { tasks: type.Task[] }) {
-    const [diceStats, setDiceStats] = useState<type.Dice>({ resultDeclared: true, spinTime: new Date(), season: -1, coins: -1, bias: -1, rollResult: 'default', streak: -1, streakHighscore: -1, cooldown: new Date(), defaultCooldown: 2, currTask: 'default' })
+    const [diceStats, setDiceStats] = useState<type.Dice>({ resultDeclared: true, spinTime: new Date(), season: -1, seasonLimit: -1, coins: -1, bias: -1, rollResult: 'default', streak: -1, streakHighscore: -1, cooldown: new Date(), defaultCooldown: 2, currTask: 'default' })
     const [task, setTask] = useState<type.Task | undefined>(undefined)
     const diceRef = useRef<HTMLButtonElement>(null);
     const [cooldownLeft, setCooldownLeft] = useState<string>("00 : 00 : 00");
@@ -187,7 +187,7 @@ export default function Dice({ tasks }: { tasks: type.Task[] }) {
                 <div className="h-6 flex flex-row gap-2 items-center justify-between">
                     <div className="text-nowrap">Season-{diceStats.season}</div>
                     <Separator orientation="vertical" />
-                    <div className="w-full pt-1 px-1"><Progress value={diceStats.bias * 5} /></div>
+                    <div className="w-full pt-1 px-1"><Progress value={((diceStats.bias-1+(diceStats.resultDeclared?0:-1))/(diceStats.seasonLimit-1))*100} /></div>
                 </div>
             </div>
         </div>

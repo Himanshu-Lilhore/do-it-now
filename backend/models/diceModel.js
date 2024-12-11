@@ -10,6 +10,9 @@ const DiceSchema = new mongoose.Schema({
     season: {
         type: Number
     },
+    seasonLimit: {
+        type: Number
+    },
     coins: {
         type: Number
     },

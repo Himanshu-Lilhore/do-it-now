@@ -457,13 +457,13 @@ export default function Home() {
 			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'>
 				{/* <div classsName='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'> */}
 
-				<div className='z-50 m-4 p-4 overflow-hidden flex flex-col border border-gray-600 rounded-lg shadow-lg hover:shadow-gray-700 shadow-gray-800'>
+				<div className='z-50 w-96 m-4 p-4 bg-background overflow-hidden flex flex-col border border-gray-600 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-600 shadow-gray-800'>
 					{/* Dice */}
-					<div className='z-[100] p-6 overflow-hidden w-96'>
+					<div className='z-[100] p-6 overflow-hidden w-full'>
 						<Dice tasks={tasks} />
 					</div>
 					{/* 4am  */}
-					<iframe className='w-full h-[42rem] rounded-lg'
+					<iframe className='w-full h-[42rem] rounded-xl'
 						src=
 						"https://himanshu-lilhore.github.io/4am/client/"
 						title="4am" >

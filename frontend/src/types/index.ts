@@ -36,6 +36,7 @@ export interface Dice {
 	resultDeclared: boolean,
 	spinTime: Date,
     season: number,
+	seasonLimit: number,
     coins: number,
     bias: number,
     rollResult: String,

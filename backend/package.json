@@ -8,7 +8,8 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "seedTags": "node seeds/seedTags.js",
-    "cleanup": "node seeds/cleanup.js"
+    "cleanup": "node seeds/cleanup.js",
+    "cleanDice": "node seeds/diceCleanup.js"
   },
   "engines": {
     "node": "20.x"
