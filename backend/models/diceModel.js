@@ -1,6 +1,12 @@
 const mongoose = require('mongoose');
 
 const DiceSchema = new mongoose.Schema({
+    resultDeclared: {
+        type: Boolean
+    },
+    spinTime: {
+        type: Date
+    },
     season: {
         type: Number
     },
@@ -26,6 +32,9 @@ const DiceSchema = new mongoose.Schema({
     },
     cooldown: {
         type: Date,
+    },
+    defaultCooldown: {  // in hours
+        type: Number
     },
     currTask: {
         type: mongoose.Schema.Types.ObjectId,

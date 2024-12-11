@@ -33,6 +33,8 @@ export interface Tag {
 	_id: string
 }
 export interface Dice {
+	resultDeclared: boolean,
+	spinTime: Date,
     season: number,
     coins: number,
     bias: number,
@@ -40,5 +42,6 @@ export interface Dice {
     streak:  number,
     streakHighscore: number,
     cooldown: Date,
+	defaultCooldown: number,
     currTask: String
 }

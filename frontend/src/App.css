@@ -25,3 +25,14 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+
+
+#diceTaskOptions{
+    transition: all 200ms ease-in-out;
+}
+#diceTask:hover{
+    #diceTaskOptions{
+        opacity: 1;
+        transform: translateY(100%);
+    }
+}

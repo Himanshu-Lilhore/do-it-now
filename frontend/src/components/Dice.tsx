@@ -6,11 +6,15 @@ import TaskReassignTable from "./TaskReassignTable";
 import { Progress } from "./ui/progress";
 import { Separator } from "./ui/separator";
 import { Label } from "./ui/label";
+import CloseIcon from "@/assets/CloseIcon";
+import TickIcon from "@/assets/TickIcon";
+import { toast } from '@/hooks/use-toast';
+
 Axios.defaults.withCredentials = true
 
 
 export default function Dice({ tasks }: { tasks: type.Task[] }) {
-    const [diceStats, setDiceStats] = useState<type.Dice>({ season: -1, coins: -1, bias: -1, rollResult: 'default', streak: -1, streakHighscore: -1, cooldown: new Date(), currTask: 'default' })
+    const [diceStats, setDiceStats] = useState<type.Dice>({ resultDeclared: true, spinTime: new Date(), season: -1, coins: -1, bias: -1, rollResult: 'default', streak: -1, streakHighscore: -1, cooldown: new Date(), defaultCooldown: 2, currTask: 'default' })
     const [task, setTask] = useState<type.Task | undefined>(undefined)
     const diceRef = useRef<HTMLButtonElement>(null);
     const [cooldownLeft, setCooldownLeft] = useState<string>("00 : 00 : 00");
@@ -20,7 +24,7 @@ export default function Dice({ tasks }: { tasks: type.Task[] }) {
             try {
                 const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/dice/read`);
                 if (response.status === 200) {
-                    setDiceStats(response.data);
+                    setDiceStatsProperly(response.data);
                 } else {
                     console.log("couldn't read dice stats");
                 }
@@ -29,13 +33,18 @@ export default function Dice({ tasks }: { tasks: type.Task[] }) {
             }
         };
         readDiceStats();
-        console.log(diceStats)//////////////
     }, []);
+    
+    
+    useEffect(() => {
+        console.log(diceStats)//////////////
+        setTask(tasks.find((task) => task._id === diceStats.currTask));
+    }, [tasks, diceStats]);
 
 
     useEffect(() => {
-        setTask(tasks.find((task) => task._id === diceStats.currTask));
-    }, [tasks, diceStats.currTask]);
+        console.log(task)
+    }, [task])
 
 
     useEffect(() => {
@@ -63,17 +72,52 @@ export default function Dice({ tasks }: { tasks: type.Task[] }) {
     }, [diceStats.cooldown]);
 
 
+    const setDiceStatsProperly = (data : type.Dice) => {
+        setDiceStats({...data, spinTime: new Date(data.spinTime), cooldown: new Date(data.cooldown)});
+    }
+
+
     const rollDice = async () => {
+        if(!diceStats.resultDeclared) {
+            toast({
+                description: "Can't roll the dice when you already have an ongoing task.",
+                variant: "destructive"
+            })
+            return;
+        }
         if (diceRef.current) {
             diceRef.current.classList.toggle('rotate-180');
         }
         try {
             const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/dice/roll`);
             if (response.status === 200) {
-                setDiceStats(response.data)
+                setDiceStatsProperly(response.data)
             } else console.log("couldn't roll dice")
         } catch (err) {
             console.log("Error rolling dice", err)
+        }
+    }
+
+
+    const taskDone = async () => {
+        try{
+            const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/dice/pass`);
+            if (response.status === 200) {
+                setDiceStatsProperly(response.data)
+            } else console.log("couldn't submit result")
+        } catch (err) {
+            console.log("Error submitting pass result", err)
+        }
+    }
+
+    const taskFail = async () => {
+        try{
+            const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/dice/fail`);
+            if (response.status === 200) {
+                setDiceStatsProperly(response.data)
+            } else console.log("couldn't submit result.")
+        } catch (err) {
+            console.log("Error submitting fail result", err)
         }
     }
 
@@ -112,23 +156,26 @@ export default function Dice({ tasks }: { tasks: type.Task[] }) {
             {/* Stats  */}
             <div className="grid gap-6 text-sm">
 
-                {(new Date(diceStats.cooldown) > (new Date()) && task) &&
-                    <div className="grid grid-cols-3 items-center">
-                        <Label>Current task :</Label>
-                        <div className="col-span-2 items-center relative">
-                            <p className="text-nowrap text-ellipsis overflow-hidden items-center">{task?.title}</p>
-                            <div className="flex justify-end absolute -top-1 -right-20 hover:right-0 w-96 h-full">
-                                <TaskReassignTable tasks={tasks} setDiceStats={setDiceStats} />
+                {task && !diceStats.resultDeclared &&
+                    <div className="grid grid-cols-3 items-start">
+                        <Label className="pt-1">Current task :</Label>
+                        <div id='diceTask' className="relative col-span-2 items-center relative">
+                            <p className="text-nowrap text-ellipsis overflow-hidden items-center bg-gray-600/20 hover:bg-gray-600/30 rounded-md px-1">{task.title}</p>
+                            <div id='diceTaskOptions' className="absolute bottom-0 right-0 w-full pt-3 pr-2 flex items-center justify-end opacity-0">
+                                <div className="flex flex-row py-2 px-4 gap-4 border border-gray-300 rounded-full bg-gray-500/15">
+                                    <TaskReassignTable tasks={tasks} diceStats={diceStats} setDiceStatsProperly={setDiceStatsProperly} />
+                                    <button onClick={() => taskDone()}><TickIcon /></button>
+                                    <button onClick={() => taskFail()}><CloseIcon /></button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 }
 
-                {(new Date(diceStats.cooldown) > (new Date()) && task) &&
-
+                {task && !diceStats.resultDeclared &&
                     <div className="grid grid-cols-3 items-center">
-                        <Label>Cooldown in :</Label>
-                        <p>{cooldownLeft}</p>
+                        <Label>Cooldown :</Label>
+                        <p>{new Date(diceStats.cooldown) > (new Date()) ? cooldownLeft : 'Completed'}</p>
                     </div>
                 }
 
