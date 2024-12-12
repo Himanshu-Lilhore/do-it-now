@@ -85,6 +85,15 @@ export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChun
 
     const updateCoinCount = async (reduction: number) => {
         try {
+            setDay((prev: type.Day) => {
+                let thatChunk = prev.chunks.find((chunk) => thisChunk._id === chunk._id)
+                prev.chunks = prev.chunks.filter((chunk) => thisChunk._id !== chunk._id)
+                if (thatChunk) {
+                    thatChunk.isFrozen = true
+                    prev.chunks.push(thatChunk)
+                }
+                return prev;
+            })
             const response = await Axios.put(
                 `${import.meta.env.VITE_BACKEND_URL}/dice/update`,
                 {
@@ -406,7 +415,7 @@ export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChun
                             {thisChunk.title.toUpperCase()}
                         </div>
                         {thisChunk.tasks.length === 0 &&
-                            <div className={`flex flex-row gap-2 text-xs items-start ${(height / hourHeight) * 10 < diceStats.coins ? 'text-lime-500' : 'text-red-500'}`}>
+                            <div className={`flex flex-row gap-2 text-xs items-start ${thisChunk.isFrozen ? 'text-gray-400' : (height / hourHeight) * 10 < diceStats.coins ? 'text-lime-500' : 'text-red-500'}`}>
                                 <div>🪙{Math.round((height / hourHeight) * 10 * 100) / 100}</div>
                                 {!thisChunk.isFrozen && <button onClick={() => updateCoinCount((height / hourHeight) * 10)} className='relative grayscale hover:grayscale-0'>☑️</button>}
                             </div>
