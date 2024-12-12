@@ -1,17 +1,18 @@
 export interface Day {
-	_id?: string;
-	startOfDay: string;
-	chunks: Chunk[];
-	sleep: { start: Date | null; end: Date | null };
-	chunksRemaining: number | null;
+	_id?: string,
+	startOfDay: string,
+	chunks: Chunk[],
+	sleep: { start: Date | null; end: Date | null },
+	chunksRemaining: number | null,
 }
 export interface Chunk {
 	title: string,
-	_id: string;
-	startTime: string;
-	duration: number;
-	rating: number;
-	tasks: Task[];
+	_id: string,
+	startTime: string,
+	duration: number,
+	rating: number,
+	tasks: Task[],
+	isFrozen: boolean
 }
 export interface Task {
 	_id: string,

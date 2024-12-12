@@ -48,7 +48,7 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
     }
 
     useEffect(() => {
-        console.log('input val changed.')
+        // console.log('input val changed.')
         filterFuction('');
     }, [allTasks])
     

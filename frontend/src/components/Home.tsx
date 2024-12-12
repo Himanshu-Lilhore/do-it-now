@@ -4,7 +4,7 @@ import RefreshIcon from '@/assets/RefreshIcon';
 import AddIcon from '@/assets/AddIcon';
 import { Button } from "@/components/ui/button"
 import DateTimePicker from './DateTimePicker';
-import ResizableDiv from './ResizableDiv';
+import Chunk from './Chunk';
 import ToDoTable from './ToDoTable';
 import {
 	Dialog,
@@ -176,7 +176,7 @@ export default function Home() {
 		try {
 			const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/state/read`);
 			if (response.status === 200) {
-				console.log("State fetched successfully");
+				// console.log("State fetched successfully");
 				setCurrState(response.data)
 			}
 			else {
@@ -207,7 +207,7 @@ export default function Home() {
 				duration: 2
 			});
 			if (response.status === 200) {
-				console.log("Chunk created successfully");
+				// console.log("Chunk created successfully");
 				let newDay = day
 				newDay.chunks.push(response.data._id)
 				try {
@@ -215,7 +215,7 @@ export default function Home() {
 						...newDay
 					})
 					if (res2.status === 200) {
-						console.log("Day updated successfully");
+						// console.log("Day updated successfully");
 						setDay(res2.data)
 					}
 				} catch (err) {
@@ -277,7 +277,7 @@ export default function Home() {
 				day_id: day._id
 			});
 			if (response.status === 200) {
-				console.log(`The chunk deleted successfully & updated the day`);
+				// console.log(`The chunk deleted successfully & updated the day`);
 				fetchToday()
 			}
 			else {
@@ -434,12 +434,13 @@ export default function Home() {
 						return (
 							<div key={thisChunk._id}>
 								{thisChunk &&
-									<ResizableDiv
+									<Chunk
 										thisChunk={thisChunk}
 										hourHeight={hourHeight}
 										getChunkDepth={getChunkDepth}
 										deleteChunk={deleteChunk}
 										fetchToday={fetchToday}
+										setDay={setDay}
 										tasks={tasks}
 										fetchTasks={fetchTasks}
 										tags={tags}

@@ -23,31 +23,28 @@ import EditIcon from '@/assets/EditIcon';
 import AddIcon from '@/assets/AddIcon';
 import { Input } from './ui/input';
 import * as type from "../types/index";
+import TickIcon from '@/assets/TickIcon';
 
 Axios.defaults.withCredentials = true
 
-interface ResizableDivProps {
-    thisChunk: {
-        title: string,
-        _id: string;
-        startTime: string;
-        duration: number;
-        tasks: type.Task[];
-    };
+interface ChunkProps {
+    thisChunk: type.Chunk;
     hourHeight: number;
     getChunkDepth: (startTime: string) => number;
     deleteChunk: (chunkId: string) => void;
     fetchToday: () => void;
     tasks: type.Task[];
     fetchTasks: () => void;
-    tags: type.Tag[]
+    tags: type.Tag[];
+    setDay: any;
 }
 
-export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, deleteChunk, fetchToday, tasks, fetchTasks, tags }: ResizableDivProps) {
+export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChunk, fetchToday, tasks, fetchTasks, tags, setDay }: ChunkProps) {
     const [height, setHeight] = useState<number>(thisChunk.duration * hourHeight);
     const [top, setTop] = useState<number>(getChunkDepth(thisChunk.startTime));
     const [prevTop, setPrevTop] = useState<number>(getChunkDepth(thisChunk.startTime))
     const resizableRef = useRef<HTMLDivElement>(null);
+    const dummyRef = useRef<HTMLDivElement>(null);
     const heightRef = useRef<number>(height);
     const topRef = useRef<number>(top);
     const isResizing = useRef(false);
@@ -55,6 +52,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
     let myTimer = setTimeout(() => { return }, 1000000000);
     const [isDeleted, setIsDeleted] = useState<boolean>(false)
     const [input, setInput] = useState<string>('')
+    const [coins, setCoins] = useState(30)
 
     useEffect(() => {
         heightRef.current = height;
@@ -63,6 +61,62 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
     useEffect(() => {
         topRef.current = top;
     }, [top]);
+
+    useEffect(() => {
+        const readDiceStats = async () => {
+            try {
+                const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/dice/read`);
+                if (response.status === 200) {
+                    setCoins(response.data.coins);
+                } else {
+                    console.log("couldn't read dice stats");
+                }
+            } catch (err) {
+                console.log("Error reading dice stats", err);
+            }
+        };
+        readDiceStats();
+    }, []);
+
+
+    const updateCoinCount = async (reduction: number) => {
+        try {
+            const response = await Axios.put(
+                `${import.meta.env.VITE_BACKEND_URL}/dice/update`,
+                {
+                    coins: coins - reduction
+                }
+            );
+            if (response.status === 200) {
+                setCoins(response.data.coins);
+                try {
+                    const response2 = await Axios.put(
+                        `${import.meta.env.VITE_BACKEND_URL}/chunk/update`,
+                        {
+                            _id: thisChunk._id,
+                            isFrozen: true
+                        }
+                    );
+                    if (response2.status === 200) {
+                        setDay((prev: type.Day) => {
+                            let thatChunk = prev.chunks.find((chunk) => thisChunk._id === chunk._id)
+                            prev.chunks = prev.chunks.filter((chunk) => thisChunk._id !== chunk._id)
+                            if (thatChunk) {
+                                thatChunk.isFrozen = true
+                                prev.chunks.push(thatChunk)
+                            }
+                            return prev;
+                        })
+                    }
+                } catch (err2) {
+                    console.error('Error updating chunk (isFrozen) :', err2);
+                }
+            }
+        } catch (err) {
+            console.error('Error updating coin count :', err);
+        }
+    };
+
 
 
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -77,13 +131,13 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
     };
 
     let colorHere = '#646464'
-    if(thisChunk.tasks.length) {
-        if(thisChunk.tasks[0].tags.length){
+    if (thisChunk.tasks.length) {
+        if (thisChunk.tasks[0].tags.length) {
             colorHere = tags.find(tag => tag._id.toString() === thisChunk.tasks[0].tags[0].toString())?.color || ''
         }
     }
-        
-    const backgroundColor = applyOpacityToHex( colorHere, 0.1);
+
+    const backgroundColor = applyOpacityToHex(colorHere, 0.1);
     const borderColor = colorHere;
 
 
@@ -299,7 +353,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
                                                                 if (task.status !== 'done') {
                                                                     return (
                                                                         <TableRow key={task._id}>
-                                                                            <TableCell className="font-medium min-w-44">{((task.tags.length && (tags.find(tag => tag._id === task.tags[0])?.name) === 'youtube')) ? '▶ ': ''}{task.title}</TableCell>
+                                                                            <TableCell className="font-medium min-w-44">{((task.tags.length && (tags.find(tag => tag._id === task.tags[0])?.name) === 'youtube')) ? '▶ ' : ''}{task.title}</TableCell>
                                                                             <TableCell className="min-w-24">{task.deadline ? `${new Date(task.deadline).toISOString().split('T')[0]}` : '-'}</TableCell>
                                                                             <TableCell onClick={() => addTask(thisChunk._id, task._id)}><div className='w-fit p-1 rounded-full border hover:border-gray-700'><AddIcon /></div></TableCell>
                                                                         </TableRow>
@@ -328,7 +382,7 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
 
             {/* tasks  */}
             <div
-                ref={resizableRef}
+                ref={thisChunk.isFrozen ? dummyRef : resizableRef}
                 className='absolute backdrop-blur-sm overflow-auto left-6 border-4 rounded-lg w-full cursor-move'
                 style={{
                     top: `${top}rem`,
@@ -340,15 +394,25 @@ export default function ResizableDiv({ thisChunk, hourHeight, getChunkDepth, del
             >
                 {/* chunk title  */}
                 {thisChunk.title &&
-                    <div className='text-xs px-1 tracking-widest font-bold'>
-                        {thisChunk.title.toUpperCase()}
-                    </div>}
-                {/* {thisChunk._id} */}
+                    <div className='flex flex-row px-1 gap-6 items-start'>
+                        <div className='text-xs tracking-widest font-bold'>
+                            {thisChunk.title.toUpperCase()}
+                        </div>
+                        {thisChunk.tasks.length === 0 &&
+                            <div className={`flex flex-row gap-2 text-xs items-start ${(height / hourHeight) * 10 < coins ? 'text-green-500' : 'text-red-500'}`}>
+                                <div>🪙{Math.round((height / hourHeight) * 10 * 100) / 100}</div>
+                                {!thisChunk.isFrozen && <button onClick={() => updateCoinCount((height / hourHeight) * 10)} className='relative grayscale hover:grayscale-0'>☑️</button>}
+                            </div>
+                        }
+                    </div>
+                }
+
+                {/* {thisChunk.tasks} */}
                 <div className={`${height > 9 ? 'pr-12' : `${height > 5 ? 'pr-20' : 'pr-28'}`} py-3 pl-3 flex flex-col gap-3 text-sm`}>
                     {thisChunk.tasks.map((task, idx) => (
                         <div className={`bg-stone-950/70 border p-2 rounded-md whitespace-nowrap overflow-hidden text-ellipsis ${task.status === 'done' && 'line-through'}`} key={idx}>
                             {task.title}
-                            </div>
+                        </div>
                     ))}
                 </div>
 

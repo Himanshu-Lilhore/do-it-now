@@ -39,7 +39,7 @@ export default function TaskReassignTable({ tasks, diceStats, setDiceStatsProper
 
 
     const swapTask = async (taskId: string) => {
-        console.log(`swaping assigned task...`)
+        // console.log(`swaping assigned task...`)
         try {
             const response = await Axios.put(
                 `${import.meta.env.VITE_BACKEND_URL}/dice/update`,

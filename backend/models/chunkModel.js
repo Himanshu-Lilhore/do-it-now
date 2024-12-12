@@ -21,7 +21,11 @@ const ChunkSchema = new mongoose.Schema({
     tasks: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Task'
-    }]
+    }],
+    isFrozen: {
+        type: Boolean,
+        default: false
+    }
 }, {timestamps: true});
 
 module.exports = mongoose.model('Chunk', ChunkSchema);
