@@ -37,9 +37,11 @@ interface ChunkProps {
     fetchTasks: () => void;
     tags: type.Tag[];
     setDay: any;
+    diceStats: type.Dice;
+    setDiceStats: any
 }
 
-export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChunk, fetchToday, tasks, fetchTasks, tags, setDay }: ChunkProps) {
+export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChunk, fetchToday, tasks, fetchTasks, tags, setDay, diceStats, setDiceStats }: ChunkProps) {
     const [height, setHeight] = useState<number>(thisChunk.duration * hourHeight);
     const [top, setTop] = useState<number>(getChunkDepth(thisChunk.startTime));
     const [prevTop, setPrevTop] = useState<number>(getChunkDepth(thisChunk.startTime))
@@ -52,7 +54,6 @@ export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChun
     let myTimer = setTimeout(() => { return }, 1000000000);
     const [isDeleted, setIsDeleted] = useState<boolean>(false)
     const [input, setInput] = useState<string>('')
-    const [coins, setCoins] = useState(30)
 
     useEffect(() => {
         heightRef.current = height;
@@ -67,7 +68,10 @@ export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChun
             try {
                 const response = await Axios.get(`${import.meta.env.VITE_BACKEND_URL}/dice/read`);
                 if (response.status === 200) {
-                    setCoins(response.data.coins);
+                    setDiceStats((prev:type.Dice) => {
+                        prev.coins = response.data.coins
+                        return prev;
+                    });
                 } else {
                     console.log("couldn't read dice stats");
                 }
@@ -84,11 +88,14 @@ export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChun
             const response = await Axios.put(
                 `${import.meta.env.VITE_BACKEND_URL}/dice/update`,
                 {
-                    coins: coins - reduction
+                    coins: diceStats.coins - reduction
                 }
             );
             if (response.status === 200) {
-                setCoins(response.data.coins);
+                setDiceStats((prev:type.Dice) => {
+                    prev.coins = response.data.coins
+                    return prev;
+                });
                 try {
                     const response2 = await Axios.put(
                         `${import.meta.env.VITE_BACKEND_URL}/chunk/update`,
@@ -399,7 +406,7 @@ export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChun
                             {thisChunk.title.toUpperCase()}
                         </div>
                         {thisChunk.tasks.length === 0 &&
-                            <div className={`flex flex-row gap-2 text-xs items-start ${(height / hourHeight) * 10 < coins ? 'text-green-500' : 'text-red-500'}`}>
+                            <div className={`flex flex-row gap-2 text-xs items-start ${(height / hourHeight) * 10 < diceStats.coins ? 'text-lime-500' : 'text-red-500'}`}>
                                 <div>🪙{Math.round((height / hourHeight) * 10 * 100) / 100}</div>
                                 {!thisChunk.isFrozen && <button onClick={() => updateCoinCount((height / hourHeight) * 10)} className='relative grayscale hover:grayscale-0'>☑️</button>}
                             </div>

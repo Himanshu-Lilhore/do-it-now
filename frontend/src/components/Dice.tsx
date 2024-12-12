@@ -13,8 +13,7 @@ import { toast } from '@/hooks/use-toast';
 Axios.defaults.withCredentials = true
 
 
-export default function Dice({ tasks }: { tasks: type.Task[] }) {
-    const [diceStats, setDiceStats] = useState<type.Dice>({ resultDeclared: true, spinTime: new Date(), season: -1, seasonLimit: -1, coins: -1, bias: -1, rollResult: 'default', streak: -1, streakHighscore: -1, cooldown: new Date(), defaultCooldown: 2, currTask: 'default' })
+export default function Dice({ tasks, diceStats, setDiceStats }: { tasks: type.Task[], diceStats: type.Dice, setDiceStats: any }) {
     const [task, setTask] = useState<type.Task | undefined>(undefined)
     const diceRef = useRef<HTMLButtonElement>(null);
     const [cooldownLeft, setCooldownLeft] = useState<string>("00 : 00 : 00");
@@ -131,7 +130,7 @@ export default function Dice({ tasks }: { tasks: type.Task[] }) {
                     <div>{diceStats.streak}</div>
                 </div>
                 <div className="flex flex-row gap-1">
-                    <div>{diceStats.coins}</div>
+                    <div>{Math.round(diceStats.coins * 100) / 100}</div>
                     <div>🪙</div>
                 </div>
             </div>

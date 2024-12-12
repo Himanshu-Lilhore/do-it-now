@@ -35,6 +35,7 @@ export default function Home() {
 	let startHr = new Date(Date.parse(day.startOfDay)).getHours()
 	const buttonRef = useRef<HTMLButtonElement>(null)
 	const [list, setList] = useState('All')
+	const [diceStats, setDiceStats] = useState<type.Dice>({ resultDeclared: true, spinTime: new Date(), season: 99, seasonLimit: 20, coins: 0, bias: 1, rollResult: 'default', streak: -1, streakHighscore: -1, cooldown: new Date(), defaultCooldown: 2, currTask: 'default' })
 	const [tasks, setTasks] = useState<type.Task[]>([
 		{
 			_id: 'default',
@@ -444,6 +445,8 @@ export default function Home() {
 										tasks={tasks}
 										fetchTasks={fetchTasks}
 										tags={tags}
+										diceStats={diceStats}
+										setDiceStats={setDiceStats}
 									/>
 								}
 							</div>
@@ -461,7 +464,7 @@ export default function Home() {
 				<div className='z-50 w-96 m-4 p-4 bg-background overflow-hidden flex flex-col border border-gray-600 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-600 shadow-gray-800'>
 					{/* Dice */}
 					<div className='z-[100] p-6 overflow-hidden w-full'>
-						<Dice tasks={tasks} />
+						<Dice tasks={tasks} diceStats={diceStats} setDiceStats={setDiceStats}/>
 					</div>
 					{/* 4am  */}
 					<iframe className='w-full h-[42rem] rounded-xl'
