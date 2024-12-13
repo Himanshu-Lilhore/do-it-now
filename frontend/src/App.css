@@ -1,6 +1,5 @@
 #magicdiv {
     content: ' ';
-    display:block;
     transition-property: color, background-color, border-color, fill, stroke, opacity, transform;
     transition-timing-function: ease-in;
     transition-duration: 300ms;
