@@ -25,7 +25,7 @@ export default function ListSelect({ title, setList }: { title: string, setList:
 
     return (
         <Select onValueChange={handleValueChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-40 lg:w-[180px]">
                 <SelectValue placeholder={title} />
             </SelectTrigger>
             <SelectContent>

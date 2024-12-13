@@ -397,7 +397,7 @@ export default function Home() {
 
 
 	return (
-		<div className="flex relative justify-between">
+		<div className="flex flex-col-reverse lg:flex-row relative justify-between">
 			<div id='day' className='relative min-h-fit my-2 px-8'>
 				<div>
 					{/* Hour slots */}
@@ -418,13 +418,13 @@ export default function Home() {
 				</div>
 
 				{/* --- NOW --- */}
-				<div className='absolute h-full w-[120%] left-0 top-0'>
+				<div className='absolute h-full w-full lg:w-[120%] left-0 top-0'>
 					<div ref={ref} className='absolute w-full border border-red-600' style={{ top: `${now / hourHeight <= Math.ceil(currState.workHrs + currState.sleepHrs) ? now : Math.ceil(currState.workHrs + currState.sleepHrs) * hourHeight}rem` }}></div>
 				</div>
 
 				{/* sleep indicator  */}
 				<div>
-					<div className='absolute w-full bg-gray-600/20 rounded-lg text-right' style={{ top: `${currState.workHrs * hourHeight}rem`, height: `${currState.sleepHrs * hourHeight}rem` }}>
+					<div className='absolute w-80 lg:w-full bg-gray-600/20 rounded-lg text-right' style={{ top: `${currState.workHrs * hourHeight}rem`, height: `${currState.sleepHrs * hourHeight}rem` }}>
 						✨
 					</div>
 				</div>
@@ -458,7 +458,7 @@ export default function Home() {
 
 
 
-			<div className='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'>
+			<div className='relative lg:sticky top-0 right-0 h-fit lg:pr-4 flex items-center md:items-start xl:flex-row lg:flex-col-reverse md:flex-row flex-col-reverse'>
 				{/* <div classsName='sticky top-0 right-0 h-fit 2xl:h-screen pr-4 flex xl:flex-row flex-col-reverse'> */}
 
 				<div className='z-50 w-96 m-4 p-4 bg-background overflow-hidden flex flex-col border border-gray-600 rounded-lg shadow-lg hover:shadow-xl hover:shadow-gray-600 shadow-gray-800'>
@@ -475,12 +475,12 @@ export default function Home() {
 				</div>
 
 
-				<div>
-					<h1 className="text-8xl font-bold mb-6 text-right">do-it-now</h1>
+				<div className='flex flex-col h-full'>
+					<h1 className="text-6xl lg:text-8xl font-bold mb-6 lg:text-right text-center">do-it-now</h1>
 
 					<div className='flex flex-col gap-8'>
-						<div className='flex flex-row justify-between'>
-							<div className=' '>
+						<div className='flex flex-row justify-between mx-2'>
+							<div className=''>
 								<ListSelect title={list} setList={setList} />
 							</div>
 							<div className='flex items-center justify-end gap-4'>

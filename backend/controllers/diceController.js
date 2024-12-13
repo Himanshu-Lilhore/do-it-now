@@ -115,7 +115,7 @@ const taskPass = async (req, res) => {
         let diceStats = (await Dice.findOne({ _id: (await CurrState.findOne({})).diceId })).toObject()
         const val = ((diceStats.cooldown.getTime() - diceStats.spinTime.getTime()) / (60 * 60 * 1000));
         const additionalcoins = diceStats.rollResult === 'productive' ? Math.round((3 + Math.random()*7) * val) : 1;
-        const highscore = diceStats.streakHighscore < diceStats.streak ? diceStats.streak : diceStats.streakHighscore;
+        const highscore = diceStats.streakHighscore < (diceStats.streak+1) ? (diceStats.streak+1) : diceStats.streakHighscore;
         const upgrades = {
             resultDeclared: true,
             cooldown: new Date(),

@@ -221,7 +221,7 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
                                     <TableRow key={task._id} className="">
                                         <TableCell><Checkbox checked={task.status === 'done' ? true : false} onClick={() => handleCheckboxChange(task.status, task._id)} /></TableCell>
 
-                                        <TableCell className={`${task.subTasks && task.subTasks.length ? 'underline underline-offset-4' : ''} font-medium max-w-64 whitespace-nowrap overflow-hidden text-ellipsis`}>
+                                        <TableCell className={`${task.subTasks && task.subTasks.length ? 'underline underline-offset-4' : ''} font-medium max-w-36 lg:max-w-64 whitespace-nowrap overflow-hidden text-ellipsis`}>
                                             <div className="flex flex-row h-full items-center gap-3">
                                                 {(task.tags && tags.find(tag => tag._id === task.tags[0])?.name === 'youtube') && <div><YoutubeIcon /></div>}
                                                 <div className={`${task.status === 'done' ? 'line-through decoration-stone-700 decoration-2' : ''}`}>{task.title}</div>
