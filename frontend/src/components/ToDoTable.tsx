@@ -29,7 +29,7 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
     const [input, setInput] = useState<string>('')
     const [tempInput, setTempInput] = useState<string>('')
     const [filteredOptions, setFilteredOptions] = useState<type.Task[]>(allTasks);
-    const filterTimer = useRef<any>(setTimeout(() => {},10));
+    const filterTimer = useRef<any>(setTimeout(() => { }, 10));
 
     useEffect(() => {
         fetchTasks()
@@ -39,7 +39,7 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
         setFilteredOptions(allTasks);
     }, [allTasks])
 
-    const filterFuction = (str:string) => {
+    const filterFuction = (str: string) => {
         const filtered = allTasks.filter(task => {
             return task.title.toLowerCase().includes(str.toLowerCase())
         }
@@ -51,12 +51,12 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
         // console.log('input val changed.')
         filterFuction('');
     }, [allTasks])
-    
-    
+
+
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
         const str = e.target.value
         setTempInput(str);
-        
+
         clearTimeout(filterTimer.current)
         const val = filterFuction(str)
         filterTimer.current = setTimeout(() => {
@@ -78,7 +78,6 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
 
             if (response1.status === 200) {
                 console.log('Task created successfully');
-                setTempInput('');
 
                 if (superTaskID) {
                     try {
@@ -110,6 +109,8 @@ export default function ToDoTable({ tasks, setTasks, fetchTasks, fetchToday, sup
         } catch (err) {
             console.error('Error creating task:', err);
         }
+        setTempInput('');
+        setInput('');
     };
 
     const handleTagging = async (taskId: string, tagId: string) => {
