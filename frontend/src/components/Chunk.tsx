@@ -307,7 +307,7 @@ export default function Chunk({ thisChunk, hourHeight, getChunkDepth, deleteChun
     return (
         <div id='magicdivparent'>
             <div id='magicdiv'
-                className={`hidden ${height > 9 ? 'h-[8rem] w-24' : `${height > 5 ? `h-[${Math.floor(height)}rem] w-36` : 'h-[2.5rem] w-56'} `} absolute z-10 right-2 lg:-right-6 border-r-4 border-transparent hover:border-red-900 rounded-lg items-center`}
+                className={`hidden lg:block ${height > 9 ? 'h-[8rem] w-24' : `${height > 5 ? `h-[${Math.floor(height)}rem] w-36` : 'h-[2.5rem] w-56'} `} absolute z-10 right-2 lg:-right-6 border-r-4 border-transparent hover:border-red-900 rounded-lg items-center`}
                 style={{
                     top: `${top}rem`,
                 }}>
